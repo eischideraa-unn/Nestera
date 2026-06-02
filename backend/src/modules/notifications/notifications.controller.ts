@@ -9,12 +9,15 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { NotificationsService } from './notifications.service';
 import { UpdateNotificationPreferenceDto } from './dto/update-notification-preference.dto';
 import { User } from '../user/entities/user.entity';
+import { PageOptionsDto } from '../../common/dto/page-options.dto';
+import { PageDto } from '../../common/dto/page.dto';
+import { Notification } from './entities/notification.entity';
 
 @ApiTags('notifications')
 @Controller('notifications')
@@ -24,17 +27,13 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get user notifications' })
+  @ApiOperation({ summary: 'Get paginated user notifications' })
+  @ApiResponse({ status: 200, description: 'Paginated notifications', type: PageDto })
   async getNotifications(
     @CurrentUser() user: User,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
-  ) {
-    return await this.notificationsService.getUserNotifications(
-      user.id,
-      page,
-      limit,
-    );
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Notification>> {
+    return this.notificationsService.getUserNotifications(user.id, pageOptionsDto);
   }
 
   @Get('unread-count')
