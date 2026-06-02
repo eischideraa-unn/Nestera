@@ -3,6 +3,9 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification, NotificationType } from './entities/notification.entity';
+import { PageDto } from '../../common/dto/page.dto';
+import { PageMetaDto } from '../../common/dto/page-meta.dto';
+import { PageOptionsDto } from '../../common/dto/page-options.dto';
 import {
   NotificationPreference,
   DigestFrequency,
@@ -550,18 +553,18 @@ export class NotificationsService {
    */
   async getUserNotifications(
     userId: string,
-    page: number = 1,
-    limit: number = 20,
-  ): Promise<{ notifications: Notification[]; total: number }> {
-    const [notifications, total] =
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Notification>> {
+    const [notifications, totalItemCount] =
       await this.notificationRepository.findAndCount({
         where: { userId },
         order: { createdAt: 'DESC' },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: pageOptionsDto.skip,
+        take: pageOptionsDto.limit,
       });
 
-    return { notifications, total };
+    const meta = new PageMetaDto({ pageOptionsDto, totalItemCount });
+    return new PageDto(notifications, meta);
   }
 
   /**
