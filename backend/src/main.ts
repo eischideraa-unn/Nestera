@@ -8,6 +8,8 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { EnhancedExceptionFilter } from './common/filters/enhanced-exception.filter';
+import { ErrorCodeRegistry } from './common/services/error-code-registry.service';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import {
   VersioningMiddleware,
@@ -37,7 +39,9 @@ async function bootstrap() {
   const versionAnalytics = app.get(VersionAnalyticsService);
   app.useGlobalInterceptors(new VersionAnalyticsInterceptor(versionAnalytics));
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  // Register enhanced exception filter with error code registry
+  const errorRegistry = new ErrorCodeRegistry();
+  app.useGlobalFilters(new EnhancedExceptionFilter(errorRegistry));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
