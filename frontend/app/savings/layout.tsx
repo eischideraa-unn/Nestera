@@ -6,7 +6,6 @@ export const metadata: Metadata = generatePageMetadata({
   title: "Goal-Based Savings - Nestera",
   description: "Create and manage your goal-based savings. Set targets, automate contributions, and watch your savings grow with Nestera's secure smart contract technology.",
   url: "/savings",
-  canonical: `${SITE_URL}/savings`,
 });
 
 export default function SavingsLayout({
