@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Columns } from "lucide-react";
-import { clsx } from "clsx";
+import React, { useMemo, useState } from 'react';
+import { ArrowDown, ArrowUp, Columns } from 'lucide-react';
+import { clsx } from 'clsx';
 
 export interface TableColumn<T> {
   key: string;
@@ -10,7 +10,7 @@ export interface TableColumn<T> {
   sortable?: boolean;
   visibleByDefault?: boolean;
   width?: string;
-  align?: "left" | "center" | "right";
+  align?: 'left' | 'center' | 'right';
   render?: (item: T) => React.ReactNode;
   sortValue?: (item: T) => string | number;
 }
@@ -24,20 +24,25 @@ export interface ResponsiveTableProps<T> {
   renderMobileCard: (item: T, visibleColumns: string[]) => React.ReactNode;
   pageSize?: number;
   initialSortKey?: string;
-  initialSortDirection?: "asc" | "desc";
+  initialSortDirection?: 'asc' | 'desc';
   showColumnVisibility?: boolean;
   className?: string;
   noDataMessage?: string;
 }
 
 function defaultSortValue(value: unknown) {
-  if (typeof value === "number") return value;
-  if (typeof value === "boolean") return value ? 1 : 0;
-  if (value === null || value === undefined) return "";
+  if (typeof value === 'number') return value;
+  if (typeof value === 'boolean') return value ? 1 : 0;
+  if (value === null || value === undefined) return '';
   return String(value).toLowerCase();
 }
 
-function defaultSort<T>(items: T[], columns: TableColumn<T>[], sortKey: string, direction: "asc" | "desc") {
+function defaultSort<T>(
+  items: T[],
+  columns: TableColumn<T>[],
+  sortKey: string,
+  direction: 'asc' | 'desc',
+) {
   const column = columns.find((column) => column.key === sortKey);
   if (!column) return items;
 
@@ -47,8 +52,8 @@ function defaultSort<T>(items: T[], columns: TableColumn<T>[], sortKey: string, 
     const aSort = defaultSortValue(aValue);
     const bSort = defaultSortValue(bValue);
 
-    if (aSort < bSort) return direction === "asc" ? -1 : 1;
-    if (aSort > bSort) return direction === "asc" ? 1 : -1;
+    if (aSort < bSort) return direction === 'asc' ? -1 : 1;
+    if (aSort > bSort) return direction === 'asc' ? 1 : -1;
     return 0;
   });
 }
@@ -62,12 +67,12 @@ export function ResponsiveTable<T>({
   renderMobileCard,
   pageSize = 6,
   initialSortKey,
-  initialSortDirection = "asc",
+  initialSortDirection = 'asc',
   showColumnVisibility = false,
   className,
-  noDataMessage = "No items found.",
+  noDataMessage = 'No items found.',
 }: ResponsiveTableProps<T>) {
-  const [sortKey, setSortKey] = useState(initialSortKey || columns[0]?.key || "");
+  const [sortKey, setSortKey] = useState(initialSortKey || columns[0]?.key || '');
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
   const [visibleColumns, setVisibleColumns] = useState(
     columns.filter((column) => column.visibleByDefault !== false).map((column) => column.key),
@@ -92,15 +97,17 @@ export function ResponsiveTable<T>({
 
   const handleSort = (columnKey: string) => {
     if (sortKey === columnKey) {
-      setSortDirection((direction) => (direction === "asc" ? "desc" : "asc"));
+      setSortDirection((direction) => (direction === 'asc' ? 'desc' : 'asc'));
       return;
     }
     setSortKey(columnKey);
-    setSortDirection("asc");
+    setSortDirection('asc');
   };
 
   return (
-    <div className={clsx("rounded-3xl border border-white/10 bg-[#0f2c2c] overflow-hidden", className)}>
+    <div
+      className={clsx('rounded-3xl border border-white/10 bg-[#0f2c2c] overflow-hidden', className)}
+    >
       <div className="flex flex-col gap-3 p-4 border-b border-white/10 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1 text-sm text-[#8cc0c7]">
           <p className="font-semibold text-white">{sortedItems.length} items</p>
@@ -120,8 +127,8 @@ export function ResponsiveTable<T>({
           ) : null}
 
           <span className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#8cc0c7]">
-            Sort by {columns.find((col) => col.key === sortKey)?.label ?? ""}
-            {sortDirection === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+            Sort by {columns.find((col) => col.key === sortKey)?.label ?? ''}
+            {sortDirection === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
           </span>
         </div>
       </div>
@@ -134,10 +141,10 @@ export function ResponsiveTable<T>({
                 type="button"
                 key={column.key}
                 className={clsx(
-                  "rounded-full border px-3 py-2 text-xs font-medium transition",
+                  'rounded-full border px-3 py-2 text-xs font-medium transition',
                   visibleColumns.includes(column.key)
-                    ? "border-cyan-500 bg-cyan-500/10 text-cyan-200"
-                    : "border-white/10 bg-white/5 text-[#94b9bf] hover:border-white/20 hover:bg-white/10",
+                    ? 'border-cyan-500 bg-cyan-500/10 text-cyan-200'
+                    : 'border-white/10 bg-white/5 text-[#94b9bf] hover:border-white/20 hover:bg-white/10',
                 )}
                 onClick={() => toggleColumn(column.key)}
               >
@@ -156,19 +163,34 @@ export function ResponsiveTable<T>({
           <div className="min-w-[640px]">
             <div className="hidden md:block">
               <div className="sticky top-0 z-10 bg-[#0f2c2c]">
-                {renderDesktopHeader
-                  ? renderDesktopHeader(visibleColumns)
-                  : (
-                    <div className="grid gap-4 px-5 py-3 text-xs uppercase tracking-widest text-[#5e8c96]">
-                      {columns.filter((column) => visibleColumns.includes(column.key)).map((column) => (
-                        <div key={column.key} className={clsx(column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left")}>{column.label}</div>
+                {renderDesktopHeader ? (
+                  renderDesktopHeader(visibleColumns)
+                ) : (
+                  <div className="grid gap-4 px-5 py-3 text-xs uppercase tracking-widest text-[#5e8c96]">
+                    {columns
+                      .filter((column) => visibleColumns.includes(column.key))
+                      .map((column) => (
+                        <div
+                          key={column.key}
+                          className={clsx(
+                            column.align === 'right'
+                              ? 'text-right'
+                              : column.align === 'center'
+                                ? 'text-center'
+                                : 'text-left',
+                          )}
+                        >
+                          {column.label}
+                        </div>
                       ))}
-                    </div>
-                  )}
+                  </div>
+                )}
               </div>
               <div className="divide-y divide-white/10">
                 {currentItems.map((item) => (
-                  <div key={rowKey(item)}>{renderDesktopRow ? renderDesktopRow(item, visibleColumns) : null}</div>
+                  <div key={rowKey(item)}>
+                    {renderDesktopRow ? renderDesktopRow(item, visibleColumns) : null}
+                  </div>
                 ))}
               </div>
             </div>
@@ -194,7 +216,9 @@ export function ResponsiveTable<T>({
       </div>
 
       <div className="flex flex-col gap-3 p-4 border-t border-white/10 md:flex-row md:items-center md:justify-between">
-        <p className="text-xs text-[#94b9bf]">Showing {currentItems.length} of {sortedItems.length} results</p>
+        <p className="text-xs text-[#94b9bf]">
+          Showing {currentItems.length} of {sortedItems.length} results
+        </p>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -204,7 +228,9 @@ export function ResponsiveTable<T>({
           >
             Prev
           </button>
-          <span className="text-sm text-[#94b9bf]">{page} / {pageCount}</span>
+          <span className="text-sm text-[#94b9bf]">
+            {page} / {pageCount}
+          </span>
           <button
             type="button"
             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-[#c5e7e7] disabled:cursor-not-allowed disabled:opacity-50"

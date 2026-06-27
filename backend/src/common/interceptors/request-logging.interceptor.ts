@@ -106,9 +106,7 @@ export class RequestLoggingInterceptor implements NestInterceptor {
     const address = reqWithUser.user?.address;
 
     // Log incoming request (headers sanitized but not logged to avoid noise)
-    void this.sanitizer?.sanitizeHeaders(
-      request.headers as Record<string, string | string[] | undefined>,
-    );
+    void this.sanitizer?.sanitizeHeaders(request.headers);
 
     // Log incoming request
     this.pinoLogger.log({
@@ -136,7 +134,12 @@ export class RequestLoggingInterceptor implements NestInterceptor {
         const statusCode = response.statusCode;
 
         // APM: track request metrics
-        this.apmService?.trackHttpRequest(method, rawPath, statusCode, duration);
+        this.apmService?.trackHttpRequest(
+          method,
+          rawPath,
+          statusCode,
+          duration,
+        );
 
         const logPayload = {
           msg: `← ${method} ${url} ${statusCode} (${duration}ms)`,
@@ -162,7 +165,12 @@ export class RequestLoggingInterceptor implements NestInterceptor {
         const isClientError = statusCode < 500;
 
         // APM: track errors
-        this.apmService?.trackHttpRequest(method, rawPath, statusCode, duration);
+        this.apmService?.trackHttpRequest(
+          method,
+          rawPath,
+          statusCode,
+          duration,
+        );
         if (!isClientError) {
           this.apmService?.trackError(error, {
             route: rawPath,

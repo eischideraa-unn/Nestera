@@ -1,34 +1,34 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useOnboarding } from "../context/OnboardingContext";
-import { ArrowLeft, ArrowRight, CheckCircle2, Sparkles, X } from "lucide-react";
-import { Button } from "./ui/Button";
+import React from 'react';
+import { useOnboarding } from '../context/OnboardingContext';
+import { ArrowLeft, ArrowRight, CheckCircle2, Sparkles, X } from 'lucide-react';
+import { Button } from './ui/Button';
 
 const ONBOARDING_STEPS = [
   {
-    title: "Welcome to Nestera!",
-    description: "Your gateway to smart savings and decentralized finance.",
+    title: 'Welcome to Nestera!',
+    description: 'Your gateway to smart savings and decentralized finance.',
     icon: <Sparkles className="w-12 h-12 text-emerald-400" />,
   },
   {
-    title: "Connect Your Wallet",
-    description: "Link your crypto wallet to start using all features.",
+    title: 'Connect Your Wallet',
+    description: 'Link your crypto wallet to start using all features.',
     icon: <ArrowRight className="w-12 h-12 text-blue-400" />,
   },
   {
-    title: "Explore the Dashboard",
-    description: "Get familiar with your portfolio, goals, and savings pools.",
+    title: 'Explore the Dashboard',
+    description: 'Get familiar with your portfolio, goals, and savings pools.',
     icon: <CheckCircle2 className="w-12 h-12 text-purple-400" />,
   },
   {
-    title: "Create Your First Goal",
-    description: "Set a savings target and start growing your funds.",
+    title: 'Create Your First Goal',
+    description: 'Set a savings target and start growing your funds.',
     icon: <Sparkles className="w-12 h-12 text-amber-400" />,
   },
   {
-    title: "Make Your First Deposit",
-    description: "Fund your goal and watch your savings grow with yield.",
+    title: 'Make Your First Deposit',
+    description: 'Fund your goal and watch your savings grow with yield.',
     icon: <CheckCircle2 className="w-12 h-12 text-rose-400" />,
   },
   {
@@ -80,9 +80,7 @@ export function OnboardingWizard() {
         </div>
 
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="mb-6 p-4 rounded-full bg-gray-800">
-            {step.icon}
-          </div>
+          <div className="mb-6 p-4 rounded-full bg-gray-800">{step.icon}</div>
           <h2 className="text-2xl font-bold text-white mb-2">{step.title}</h2>
           <p className="text-gray-400">{step.description}</p>
         </div>
@@ -102,10 +100,10 @@ export function OnboardingWizard() {
           <Button
             variant="primary"
             onClick={isLastStep ? completeOnboarding : nextStep}
-            className={isFirstStep ? "flex-1" : "flex-1"}
-            aria-label={isLastStep ? "Complete onboarding" : "Next step"}
+            className={isFirstStep ? 'flex-1' : 'flex-1'}
+            aria-label={isLastStep ? 'Complete onboarding' : 'Next step'}
           >
-            {isLastStep ? "Get Started" : "Next"}
+            {isLastStep ? 'Get Started' : 'Next'}
             {!isLastStep && <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
         </div>

@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 interface SecretMetadata {
@@ -68,7 +73,8 @@ export class SecretsManagerService implements OnModuleInit, OnModuleDestroy {
     this.secretsMetadata.set(key, {
       key,
       createdAt: Date.now(),
-      expiresAt: expiresAt || Date.now() + this.SECRET_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+      expiresAt:
+        expiresAt || Date.now() + this.SECRET_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
       rotatedAt: Date.now(),
     });
     this.logger.log(`Secret ${key} updated`);
@@ -94,11 +100,16 @@ export class SecretsManagerService implements OnModuleInit, OnModuleDestroy {
   }
 
   private startExpirationMonitor() {
-    this.expirationMonitor = setInterval(() => {
-      const expiring = this.getExpiringSecrets(30);
-      if (expiring.length > 0) {
-        this.logger.warn(`Found ${expiring.length} expiring secrets: ${expiring.map(s => s.key).join(', ')}`);
-      }
-    }, 24 * 60 * 60 * 1000);
+    this.expirationMonitor = setInterval(
+      () => {
+        const expiring = this.getExpiringSecrets(30);
+        if (expiring.length > 0) {
+          this.logger.warn(
+            `Found ${expiring.length} expiring secrets: ${expiring.map((s) => s.key).join(', ')}`,
+          );
+        }
+      },
+      24 * 60 * 60 * 1000,
+    );
   }
 }

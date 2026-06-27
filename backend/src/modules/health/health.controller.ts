@@ -1,4 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, Query, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -172,7 +179,12 @@ export class HealthController {
   @ApiOperation({ summary: 'Health check dashboard' })
   async dashboard(@Res() res: Response) {
     const data = await this.detailed();
-    const scoreColor = parseInt(data.score) > 90 ? '#10B981' : parseInt(data.score) > 70 ? '#F59E0B' : '#EF4444';
+    const scoreColor =
+      parseInt(data.score) > 90
+        ? '#10B981'
+        : parseInt(data.score) > 70
+          ? '#F59E0B'
+          : '#EF4444';
 
     const html = `
       <!DOCTYPE html>
@@ -207,7 +219,9 @@ export class HealthController {
               </div>
             </div>
             <div class="service-grid">
-              ${Object.entries(data.checks).map(([name, details]: [string, any]) => `
+              ${Object.entries(data.checks)
+                .map(
+                  ([name, details]: [string, any]) => `
                 <div class="service-card">
                   <div class="service-name">${name.replace('-', ' ')}</div>
                   <div class="${details.status === 'up' ? 'status-up' : 'status-down'}">
@@ -218,7 +232,9 @@ export class HealthController {
                     ${details.error ? `<div class="status-down">${details.error}</div>` : ''}
                   </div>
                 </div>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </div>
           </div>
           <script>

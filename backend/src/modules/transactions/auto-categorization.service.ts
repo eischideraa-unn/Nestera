@@ -21,7 +21,9 @@ export class AutoCategorizationService {
     amazon: TransactionCategory.SHOPPING,
   };
 
-  predictCategory(metadata: Record<string, any> | undefined): TransactionCategory | null {
+  predictCategory(
+    metadata: Record<string, any> | undefined,
+  ): TransactionCategory | null {
     if (!metadata) return null;
 
     // Look into common fields

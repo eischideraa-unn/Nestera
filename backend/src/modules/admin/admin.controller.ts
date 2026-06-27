@@ -61,7 +61,10 @@ export class AdminController {
   })
   @ApiParam({ name: 'id', description: 'User UUID' })
   @ApiResponse({ status: 200, description: 'KYC rejected' })
-  @ApiResponse({ status: 400, description: 'Missing user ID or rejection reason' })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing user ID or rejection reason',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Admin role required' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -84,7 +87,8 @@ export class AdminController {
   })
   @ApiOperation({
     summary: 'Approve or reject KYC for a user (single endpoint)',
-    description: 'Set `action` to `"approve"` or `"reject"`. Reason is required for rejection.',
+    description:
+      'Set `action` to `"approve"` or `"reject"`. Reason is required for rejection.',
   })
   @ApiParam({ name: 'id', description: 'User UUID' })
   @ApiResponse({ status: 200, description: 'KYC status updated' })
@@ -125,7 +129,12 @@ export class AdminController {
 
   @Get('rate-limits/violations')
   @ApiOperation({ summary: 'Get recent rate limit violations' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Max results (default 50)', type: Number })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Max results (default 50)',
+    type: Number,
+  })
   @ApiResponse({ status: 200, description: 'Recent rate limit violations' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Admin role required' })
@@ -138,7 +147,12 @@ export class AdminController {
   @Get('rate-limits/violations/:userId')
   @ApiOperation({ summary: 'Get rate limit violations for a specific user' })
   @ApiParam({ name: 'userId', description: 'User UUID' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Max results (default 50)', type: Number })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Max results (default 50)',
+    type: Number,
+  })
   @ApiResponse({ status: 200, description: 'User rate limit violations' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Admin role required' })

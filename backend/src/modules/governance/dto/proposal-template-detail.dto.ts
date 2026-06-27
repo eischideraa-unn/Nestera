@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ProposalCategory, ProposalType } from '../entities/governance-proposal.entity';
+import {
+  ProposalCategory,
+  ProposalType,
+} from '../entities/governance-proposal.entity';
 
 export class ProposalTemplateParameterDto {
   @ApiProperty({ description: 'Parameter name' })
@@ -17,13 +20,23 @@ export class ProposalTemplateParameterDto {
   @ApiProperty({ description: 'Whether the field is required' })
   required: boolean;
 
-  @ApiProperty({ description: 'Allowed values when using an enum', required: false, example: ['flexiRate', 'fixedRate'] })
+  @ApiProperty({
+    description: 'Allowed values when using an enum',
+    required: false,
+    example: ['flexiRate', 'fixedRate'],
+  })
   allowedValues?: string[];
 
-  @ApiProperty({ description: 'Minimum numeric value when applicable', required: false })
+  @ApiProperty({
+    description: 'Minimum numeric value when applicable',
+    required: false,
+  })
   min?: number;
 
-  @ApiProperty({ description: 'Maximum numeric value when applicable', required: false })
+  @ApiProperty({
+    description: 'Maximum numeric value when applicable',
+    required: false,
+  })
   max?: number;
 
   @ApiProperty({ description: 'Default value when omitted', required: false })

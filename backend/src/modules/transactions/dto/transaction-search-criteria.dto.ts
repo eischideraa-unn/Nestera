@@ -34,7 +34,8 @@ function toStringArray(value: unknown): string[] | undefined {
 
 export class TransactionSearchCriteriaDto {
   @ApiPropertyOptional({
-    description: 'Free-text search across hash, event ID, pool ID, tags, metadata, and more',
+    description:
+      'Free-text search across hash, event ID, pool ID, tags, metadata, and more',
     example: 'yield pool-1',
   })
   @IsOptional()

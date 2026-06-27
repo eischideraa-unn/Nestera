@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ProposalCategory, ProposalType } from '../entities/governance-proposal.entity';
+import {
+  ProposalCategory,
+  ProposalType,
+} from '../entities/governance-proposal.entity';
 
 export class ProposalTemplateSummaryDto {
   @ApiProperty({ description: 'Template identifier' })

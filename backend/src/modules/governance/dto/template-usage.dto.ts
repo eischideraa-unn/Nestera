@@ -10,7 +10,9 @@ export class TemplateUsageDto {
   @ApiProperty({ description: 'Template name' })
   templateName: string;
 
-  @ApiProperty({ description: 'Number of proposals created using this template' })
+  @ApiProperty({
+    description: 'Number of proposals created using this template',
+  })
   proposalsCreated: number;
 
   @ApiProperty({ description: 'Number of passed proposals' })

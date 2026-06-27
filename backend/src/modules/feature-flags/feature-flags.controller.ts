@@ -50,9 +50,15 @@ export class FeatureFlagsController {
     @Query('segments') segments?: string | string[],
   ) {
     const segmentList = segments
-      ? Array.isArray(segments) ? segments : [segments]
+      ? Array.isArray(segments)
+        ? segments
+        : [segments]
       : undefined;
-    return this.service.evaluate(key, { address, network, segments: segmentList });
+    return this.service.evaluate(key, {
+      address,
+      network,
+      segments: segmentList,
+    });
   }
 
   /** Admin: get a single flag */

@@ -106,7 +106,8 @@ export class StandardErrorResponseDto {
 
   @ApiProperty({
     type: DebugContext,
-    description: 'Debug information (present only in development/test environments)',
+    description:
+      'Debug information (present only in development/test environments)',
     required: false,
   })
   debugContext?: DebugContext;

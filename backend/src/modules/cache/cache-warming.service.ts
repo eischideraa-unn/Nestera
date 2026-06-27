@@ -80,9 +80,14 @@ export class CacheWarmingService {
   getWarmingMetrics() {
     return {
       ...this.warmingMetrics,
-      successRate: this.warmingMetrics.totalWarmed > 0
-        ? ((this.warmingMetrics.successCount / this.warmingMetrics.totalWarmed) * 100).toFixed(2) + '%'
-        : '0%',
+      successRate:
+        this.warmingMetrics.totalWarmed > 0
+          ? (
+              (this.warmingMetrics.successCount /
+                this.warmingMetrics.totalWarmed) *
+              100
+            ).toFixed(2) + '%'
+          : '0%',
     };
   }
 

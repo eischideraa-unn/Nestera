@@ -11,7 +11,12 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { NotificationsService } from './notifications.service';
@@ -30,12 +35,19 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: 'Get paginated user notifications' })
-  @ApiResponse({ status: 200, description: 'Paginated notifications', type: PageDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated notifications',
+    type: PageDto,
+  })
   async getNotifications(
     @CurrentUser() user: User,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Notification>> {
-    return this.notificationsService.getUserNotifications(user.id, pageOptionsDto);
+    return this.notificationsService.getUserNotifications(
+      user.id,
+      pageOptionsDto,
+    );
   }
 
   @Get('unread-count')

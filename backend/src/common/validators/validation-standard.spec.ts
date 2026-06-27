@@ -50,7 +50,7 @@ describe('Validation Standardization and Sanitization', () => {
       fail('Should have thrown BadRequestException');
     } catch (error) {
       expect(error).toBeInstanceOf(BadRequestException);
-      const response = error.getResponse() as any;
+      const response = error.getResponse();
       expect(response.message).toBe('Validation failed');
       expect(response.errors).toBeDefined();
       expect(response.errors).toHaveLength(1);

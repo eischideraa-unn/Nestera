@@ -6,9 +6,7 @@ import {
   TableIndex,
 } from 'typeorm';
 
-export class CreateTransactionSavedSearches1800200000000
-  implements MigrationInterface
-{
+export class CreateTransactionSavedSearches1800200000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -100,7 +98,10 @@ export class CreateTransactionSavedSearches1800200000000
       fk.columnNames.includes('userId'),
     );
     if (foreignKey) {
-      await queryRunner.dropForeignKey('transaction_saved_searches', foreignKey);
+      await queryRunner.dropForeignKey(
+        'transaction_saved_searches',
+        foreignKey,
+      );
     }
     await queryRunner.dropTable('transaction_saved_searches');
   }

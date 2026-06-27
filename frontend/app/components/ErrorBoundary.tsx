@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { captureError, addBreadcrumb } from "../lib/monitoring";
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { captureError, addBreadcrumb } from '../lib/monitoring';
 
 interface Props {
   children: ReactNode;
@@ -36,21 +36,21 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[ErrorBoundary]", error, info.componentStack);
+    console.error('[ErrorBoundary]', error, info.componentStack);
 
     addBreadcrumb({
-      message: `ErrorBoundary caught error in "${this.props.name ?? "unknown"}"`,
-      category: "runtime",
+      message: `ErrorBoundary caught error in "${this.props.name ?? 'unknown'}"`,
+      category: 'runtime',
       data: {
         componentStack: info.componentStack?.slice(0, 500),
         boundary: this.props.name,
       },
-      level: "error",
+      level: 'error',
     });
 
     captureError(error, {
-      category: "runtime",
-      tags: { boundary: this.props.name ?? "unknown" },
+      category: 'runtime',
+      tags: { boundary: this.props.name ?? 'unknown' },
       extra: {
         componentStack: info.componentStack?.slice(0, 500),
       },

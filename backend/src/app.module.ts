@@ -52,6 +52,7 @@ import { PostmanModule } from './common/postman/postman.module';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { CompressionMetricsMiddleware } from './common/middleware/compression.middleware';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { JobQueueModule } from './modules/job-queue/job-queue.module';
 import { GracefulShutdownService } from './common/services/graceful-shutdown.service';
 import { ApmModule } from './modules/apm/apm.module';
 import { PerformanceModule } from './modules/performance/performance.module';
@@ -325,6 +326,7 @@ const envValidationSchema = Joi.object({
     ApmModule,
     FeatureFlagsModule,
     JobsModule,
+    JobQueueModule,
     SandboxModule,
     FeedbackModule,
     CommonModule,

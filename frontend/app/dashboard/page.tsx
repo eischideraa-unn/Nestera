@@ -1,8 +1,8 @@
-import React from "react";
-import NetWorthCard from "../components/dashboard/NetWorthCard";
-import QuickActionsGrid from "../components/dashboard/QuickActionsGrid";
-import ActivePoolList from "../components/dashboard/ActivePoolList";
-import RecentTransactionsWidget from "../components/dashboard/RecentTransactionsWidget";
+import React from 'react';
+import NetWorthCard from '../components/dashboard/NetWorthCard';
+import QuickActionsGrid from '../components/dashboard/QuickActionsGrid';
+import ActivePoolList from '../components/dashboard/ActivePoolList';
+import RecentTransactionsWidget from '../components/dashboard/RecentTransactionsWidget';
 
 export default function DashboardPage() {
   return (

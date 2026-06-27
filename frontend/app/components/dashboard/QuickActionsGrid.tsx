@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React from "react";
-import { ArrowDownCircle, ArrowUpCircle, Repeat, Link } from "lucide-react";
+import React from 'react';
+import { ArrowDownCircle, ArrowUpCircle, Repeat, Link } from 'lucide-react';
 
 const actions = [
-  { label: "Deposit", icon: ArrowDownCircle },
-  { label: "Withdraw", icon: ArrowUpCircle },
-  { label: "Swap", icon: Repeat },
-  { label: "Bridge", icon: Link },
+  { label: 'Deposit', icon: ArrowDownCircle },
+  { label: 'Withdraw', icon: ArrowUpCircle },
+  { label: 'Swap', icon: Repeat },
+  { label: 'Bridge', icon: Link },
 ];
 
 const QuickActionsGrid: React.FC = () => {

@@ -4,7 +4,9 @@ import { CompressionMetricsService } from '../services/compression-metrics.servi
 
 @Injectable()
 export class CompressionMetricsMiddleware implements NestMiddleware {
-  constructor(private readonly compressionMetricsService: CompressionMetricsService) {}
+  constructor(
+    private readonly compressionMetricsService: CompressionMetricsService,
+  ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     let bytesWritten = 0;
@@ -12,11 +14,15 @@ export class CompressionMetricsMiddleware implements NestMiddleware {
     const originalWrite = res.write.bind(res);
     const originalEnd = res.end.bind(res);
 
-    res.write = ((chunk: any, encoding?: BufferEncoding, cb?: (error?: Error) => void) => {
+    res.write = ((
+      chunk: any,
+      encoding?: BufferEncoding,
+      cb?: (error?: Error) => void,
+    ) => {
       if (chunk) {
         bytesWritten += Buffer.isBuffer(chunk)
           ? chunk.length
-          : Buffer.byteLength(chunk, encoding as BufferEncoding);
+          : Buffer.byteLength(chunk, encoding);
       }
       return originalWrite(chunk, encoding, cb);
     }) as typeof res.write;
@@ -25,7 +31,7 @@ export class CompressionMetricsMiddleware implements NestMiddleware {
       if (chunk) {
         bytesWritten += Buffer.isBuffer(chunk)
           ? chunk.length
-          : Buffer.byteLength(chunk, encoding as BufferEncoding);
+          : Buffer.byteLength(chunk, encoding);
       }
       return originalEnd(chunk, encoding, cb);
     }) as typeof res.end;

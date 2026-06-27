@@ -197,7 +197,7 @@ describe('TransactionsController', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const res = await controller.createSavedSearch(mockUser, payload as any);
+      const res = await controller.createSavedSearch(mockUser, payload);
 
       expect(service.createSavedSearch).toHaveBeenCalledWith(
         mockUser.id,

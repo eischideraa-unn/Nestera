@@ -39,13 +39,17 @@ function assertStringField(
   const value = params[field];
   if (value === undefined || value === null) {
     if (required) {
-      throw new Error(`Template ${templateId}: missing required parameter '${field}'`);
+      throw new Error(
+        `Template ${templateId}: missing required parameter '${field}'`,
+      );
     }
     return undefined;
   }
 
   if (typeof value !== 'string' || !value.trim()) {
-    throw new Error(`Template ${templateId}: parameter '${field}' must be a non-empty string`);
+    throw new Error(
+      `Template ${templateId}: parameter '${field}' must be a non-empty string`,
+    );
   }
   return value.trim();
 }
@@ -61,20 +65,28 @@ function assertNumberField(
   const value = params[field];
   if (value === undefined || value === null) {
     if (required) {
-      throw new Error(`Template ${templateId}: missing required parameter '${field}'`);
+      throw new Error(
+        `Template ${templateId}: missing required parameter '${field}'`,
+      );
     }
     return undefined;
   }
 
   if (typeof value !== 'number' || Number.isNaN(value)) {
-    throw new Error(`Template ${templateId}: parameter '${field}' must be a number`);
+    throw new Error(
+      `Template ${templateId}: parameter '${field}' must be a number`,
+    );
   }
 
   if (min !== undefined && value < min) {
-    throw new Error(`Template ${templateId}: parameter '${field}' must be at least ${min}`);
+    throw new Error(
+      `Template ${templateId}: parameter '${field}' must be at least ${min}`,
+    );
   }
   if (max !== undefined && value > max) {
-    throw new Error(`Template ${templateId}: parameter '${field}' must be at most ${max}`);
+    throw new Error(
+      `Template ${templateId}: parameter '${field}' must be at most ${max}`,
+    );
   }
 
   return value;
@@ -114,7 +126,8 @@ const PROPOSAL_TEMPLATES: ProposalTemplateDefinition[] = [
       {
         name: 'target',
         label: 'Rate target',
-        description: 'The rate field to change, for example flexiRate or fixedRate.',
+        description:
+          'The rate field to change, for example flexiRate or fixedRate.',
         type: 'enum',
         required: true,
         allowedValues: ['flexiRate', 'fixedRate'],
@@ -123,7 +136,8 @@ const PROPOSAL_TEMPLATES: ProposalTemplateDefinition[] = [
       {
         name: 'newValue',
         label: 'New rate value',
-        description: 'The new rate percentage to apply for the selected target.',
+        description:
+          'The new rate percentage to apply for the selected target.',
         type: 'number',
         required: true,
         min: 0,
@@ -154,7 +168,12 @@ const PROPOSAL_TEMPLATES: ProposalTemplateDefinition[] = [
         0,
         100,
       );
-      const reason = assertStringField(params, 'reason', 'rate-change-standard', false);
+      const reason = assertStringField(
+        params,
+        'reason',
+        'rate-change-standard',
+        false,
+      );
 
       return {
         target,
@@ -181,7 +200,12 @@ const PROPOSAL_TEMPLATES: ProposalTemplateDefinition[] = [
       },
     ],
     actionFactory: (params) => {
-      const reason = assertStringField(params, 'reason', 'pause-protocol', false);
+      const reason = assertStringField(
+        params,
+        'reason',
+        'pause-protocol',
+        false,
+      );
       return {
         ...(reason ? { reason } : {}),
       };
@@ -191,7 +215,8 @@ const PROPOSAL_TEMPLATES: ProposalTemplateDefinition[] = [
     id: 'unpause-protocol',
     version: '1.0',
     name: 'Resume Protocol',
-    description: 'Create a proposal to unpause the protocol after a maintenance pause.',
+    description:
+      'Create a proposal to unpause the protocol after a maintenance pause.',
     type: ProposalType.UNPAUSE,
     category: ProposalCategory.GOVERNANCE,
     parameterSchema: [
@@ -205,7 +230,12 @@ const PROPOSAL_TEMPLATES: ProposalTemplateDefinition[] = [
       },
     ],
     actionFactory: (params) => {
-      const reason = assertStringField(params, 'reason', 'unpause-protocol', false);
+      const reason = assertStringField(
+        params,
+        'reason',
+        'unpause-protocol',
+        false,
+      );
       return {
         ...(reason ? { reason } : {}),
       };
@@ -268,8 +298,15 @@ const PROPOSAL_TEMPLATES: ProposalTemplateDefinition[] = [
         true,
         0.00000001,
       );
-      const asset = assertStringField(params, 'asset', 'treasury-allocation', false) ?? 'NST';
-      const reason = assertStringField(params, 'reason', 'treasury-allocation', false);
+      const asset =
+        assertStringField(params, 'asset', 'treasury-allocation', false) ??
+        'NST';
+      const reason = assertStringField(
+        params,
+        'reason',
+        'treasury-allocation',
+        false,
+      );
       return {
         recipient,
         amount,

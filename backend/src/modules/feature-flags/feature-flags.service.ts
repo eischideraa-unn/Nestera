@@ -30,7 +30,9 @@ export class FeatureFlagsService {
   }
 
   async create(dto: CreateFlagDto): Promise<FeatureFlag> {
-    const existing = await this.flagRepository.findOne({ where: { key: dto.key } });
+    const existing = await this.flagRepository.findOne({
+      where: { key: dto.key },
+    });
     if (existing) {
       throw new ConflictException(`Feature flag "${dto.key}" already exists`);
     }
@@ -49,7 +51,9 @@ export class FeatureFlagsService {
     const flag = await this.findOne(key);
     Object.assign(flag, dto);
     const saved = await this.flagRepository.save(flag);
-    this.logger.log(`Feature flag updated: ${key}`, { changes: Object.keys(dto) });
+    this.logger.log(`Feature flag updated: ${key}`, {
+      changes: Object.keys(dto),
+    });
     return saved;
   }
 
@@ -90,7 +94,10 @@ export class FeatureFlagsService {
       );
       if (isTargeted) {
         return {
-          value: flag.type === 'boolean' ? flag.enabled : (flag.value ?? flag.defaultValue),
+          value:
+            flag.type === 'boolean'
+              ? flag.enabled
+              : (flag.value ?? flag.defaultValue),
           reason: 'user_targeted',
         };
       }
@@ -110,7 +117,10 @@ export class FeatureFlagsService {
       );
       if (hasSegment) {
         return {
-          value: flag.type === 'boolean' ? flag.enabled : (flag.value ?? flag.defaultValue),
+          value:
+            flag.type === 'boolean'
+              ? flag.enabled
+              : (flag.value ?? flag.defaultValue),
           reason: 'segment_matched',
         };
       }
@@ -128,7 +138,10 @@ export class FeatureFlagsService {
     }
 
     return {
-      value: flag.type === 'boolean' ? flag.enabled : (flag.value ?? flag.defaultValue),
+      value:
+        flag.type === 'boolean'
+          ? flag.enabled
+          : (flag.value ?? flag.defaultValue),
       reason: 'default',
     };
   }

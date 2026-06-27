@@ -102,9 +102,15 @@ describe('BadgesController', () => {
 
   describe('generateShareToken', () => {
     it('should generate share token for badge', async () => {
-      const result = await controller.generateShareToken('user-badge-1', mockRequest as any);
+      const result = await controller.generateShareToken(
+        'user-badge-1',
+        mockRequest as any,
+      );
 
-      expect(service.generateShareToken).toHaveBeenCalledWith('user-1', 'user-badge-1');
+      expect(service.generateShareToken).toHaveBeenCalledWith(
+        'user-1',
+        'user-badge-1',
+      );
       expect(result).toEqual({
         shareToken: 'share-token-123',
         shareUrl: '/badges/shared/share-token-123',

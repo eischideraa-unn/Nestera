@@ -1,5 +1,5 @@
-import { RateLimiter } from "./utils";
-import { captureApiError, addBreadcrumb } from "./monitoring";
+import { RateLimiter } from './utils';
+import { captureApiError, addBreadcrumb } from './monitoring';
 
 const globalRateLimiter = new RateLimiter({
   maxConcurrent: 5,
@@ -7,24 +7,18 @@ const globalRateLimiter = new RateLimiter({
   windowMs: 1000,
 });
 
-export async function rateLimitedFetch(
-  url: string,
-  options?: RequestInit
-): Promise<Response> {
+export async function rateLimitedFetch(url: string, options?: RequestInit): Promise<Response> {
   return globalRateLimiter.execute(() => fetch(url, options));
 }
 
-export async function apiRequest<T>(
-  url: string,
-  options?: RequestInit
-): Promise<T> {
-  const method = options?.method ?? "GET";
+export async function apiRequest<T>(url: string, options?: RequestInit): Promise<T> {
+  const method = options?.method ?? 'GET';
 
   addBreadcrumb({
     message: `${method} ${url}`,
-    category: "api",
+    category: 'api',
     data: { url, method },
-    level: "info",
+    level: 'info',
   });
 
   const response = await rateLimitedFetch(url, options);

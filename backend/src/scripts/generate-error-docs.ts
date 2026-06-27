@@ -11,10 +11,7 @@ async function generateDocs() {
 
   // Generate Markdown documentation
   const markdown = registry.exportToMarkdown();
-  const markdownPath = path.join(
-    __dirname,
-    '../../../docs/ERROR_CODES.md',
-  );
+  const markdownPath = path.join(__dirname, '../../../docs/ERROR_CODES.md');
   fs.mkdirSync(path.dirname(markdownPath), { recursive: true });
   fs.writeFileSync(markdownPath, markdown);
   console.log(`✅ Generated Markdown documentation: ${markdownPath}`);

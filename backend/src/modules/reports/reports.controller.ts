@@ -24,6 +24,7 @@ import {
 import { Response } from 'express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JobQueueService } from '../job-queue/job-queue.service';
 
 @ApiTags('reports')
 @Controller('reports')
@@ -31,6 +32,7 @@ export class ReportsController {
   constructor(
     private readonly reportsService: ReportsService,
     private readonly scheduledReportService: ScheduledReportService,
+    private readonly jobQueueService: JobQueueService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -55,6 +57,36 @@ export class ReportsController {
     );
 
     return res.json({ storedPath: result.path, filename: result.filename });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('tax/:year/async')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Queue a tax report for async generation' })
+  async queueTaxReport(
+    @Param('year') yearParam: string,
+    @Query('format') format = 'csv',
+    @Query('irs1099') irs1099 = 'false',
+    @CurrentUser() user: any,
+  ) {
+    const year = Number(yearParam);
+    if (!user || !user.id)
+      throw new BadRequestException('authenticated user required');
+    if (Number.isNaN(year)) throw new BadRequestException('invalid year');
+
+    const job = await this.jobQueueService.addReportJob({
+      reportType: 'tax',
+      userId: user.id,
+      params: { year, format, irs1099: irs1099 === 'true' },
+    });
+
+    return {
+      success: true,
+      statusCode: 202,
+      message: 'Report generation queued',
+      data: { jobId: job.id },
+    };
   }
 
   @Post('schedules')

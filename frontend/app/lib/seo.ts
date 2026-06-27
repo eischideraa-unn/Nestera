@@ -1,8 +1,8 @@
-import { Metadata } from "next";
+import { Metadata } from 'next';
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nestera.com";
-export const SITE_NAME = "Nestera";
-export const SITE_DESCRIPTION = "Decentralized savings & investment platform on Stellar";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nestera.com';
+export const SITE_NAME = 'Nestera';
+export const SITE_DESCRIPTION = 'Decentralized savings & investment platform on Stellar';
 
 interface PageMetadataOptions {
   title: string;
@@ -15,8 +15,8 @@ interface PageMetadataOptions {
 export function generatePageMetadata({
   title,
   description,
-  url = "/",
-  locale = "en",
+  url = '/',
+  locale = 'en',
   alternateLanguages,
 }: PageMetadataOptions): Metadata {
   const fullUrl = `${SITE_URL}${url}`;
@@ -30,17 +30,17 @@ export function generatePageMetadata({
       url: fullUrl,
       siteName: SITE_NAME,
       locale,
-      type: "website",
+      type: 'website',
     },
     twitter: {
-      card: "summary_large_image",
+      card: 'summary_large_image',
       title,
       description,
     },
     alternates: alternateLanguages
       ? {
-        languages: alternateLanguages,
-      }
+          languages: alternateLanguages,
+        }
       : undefined,
   };
 }

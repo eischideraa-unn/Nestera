@@ -1,4 +1,7 @@
-export function substituteVariables(template: string, vars: Record<string, any>) {
+export function substituteVariables(
+  template: string,
+  vars: Record<string, any>,
+) {
   if (!template) return template;
   return template.replace(/{{\s*([a-zA-Z0-9_.]+)\s*}}/g, (_, key) => {
     const parts = key.split('.');

@@ -94,6 +94,13 @@ export default () => ({
   redis: {
     url: process.env.REDIS_URL,
   },
+  jobQueue: {
+    defaultAttempts: parseInt(
+      process.env.JOB_QUEUE_DEFAULT_ATTEMPTS || '3',
+      10,
+    ),
+    backoffDelay: parseInt(process.env.JOB_QUEUE_BACKOFF_DELAY || '2000', 10),
+  },
   mail: {
     host: process.env.MAIL_HOST,
     port: parseInt(process.env.MAIL_PORT || '587', 10),

@@ -68,7 +68,9 @@ export class LogSanitizerService {
     if (Array.isArray(body)) return body.map((item) => this.sanitizeBody(item));
 
     const sanitized: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+    for (const [key, value] of Object.entries(
+      body as Record<string, unknown>,
+    )) {
       const lowerKey = key.toLowerCase();
       const isSensitive = [...LogSanitizerService.SENSITIVE_BODY_KEYS].some(
         (k) => lowerKey.includes(k.toLowerCase()),

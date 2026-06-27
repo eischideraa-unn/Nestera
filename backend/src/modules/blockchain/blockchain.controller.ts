@@ -68,8 +68,14 @@ export class BlockchainController {
   }
 
   @Get('indexer/status')
-  @ApiOperation({ summary: 'Get contract event indexer status for monitoring dashboard' })
-  @ApiResponse({ status: 200, description: 'Indexer state including ledger position, event counts, and monitored contracts' })
+  @ApiOperation({
+    summary: 'Get contract event indexer status for monitoring dashboard',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Indexer state including ledger position, event counts, and monitored contracts',
+  })
   getIndexerStatus() {
     const state = this.indexerService.getIndexerState();
     return {

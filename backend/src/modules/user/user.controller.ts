@@ -135,7 +135,11 @@ export class UserController {
       'Returns wallet balance, savings (flexible + locked), total, and percentage breakdown. ' +
       'Requires a linked Stellar wallet; returns zero balances if no wallet is linked.',
   })
-  @ApiResponse({ status: 200, description: 'Net worth data', type: NetWorthDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Net worth data',
+    type: NetWorthDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getNetWorth(@CurrentUser() user: { id: string }): Promise<NetWorthDto> {
     const userEntity = await this.userService.findById(user.id);
@@ -253,7 +257,8 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid file type or size' })
   @ApiOperation({
     summary: 'Upload a KYC document',
-    description: 'Accepts PDF or JPEG up to 10 MB. Triggers KYC review process.',
+    description:
+      'Accepts PDF or JPEG up to 10 MB. Triggers KYC review process.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({

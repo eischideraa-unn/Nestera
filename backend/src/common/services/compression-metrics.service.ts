@@ -23,8 +23,9 @@ export class CompressionMetricsService {
     this.totalResponses += 1;
     this.totalBytesSent += bytesWritten;
 
-    const contentEncoding =
-      String(response.getHeader('content-encoding') || '').toLowerCase();
+    const contentEncoding = String(
+      response.getHeader('content-encoding') || '',
+    ).toLowerCase();
     if (contentEncoding.includes('gzip') || contentEncoding.includes('br')) {
       this.compressedResponses += 1;
       this.bytesSentWithCompression += bytesWritten;

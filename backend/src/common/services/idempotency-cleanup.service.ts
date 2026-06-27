@@ -15,6 +15,8 @@ export class IdempotencyCleanupService {
     this.logger.log('Idempotency cleanup job running...');
     // Note: Since we use Redis with TTL, expired keys are handled automatically by Redis.
     // This job serves as a hook for any additional cleanup or monitoring.
-    this.logger.log('Idempotency cleanup completed (Redis TTL handles key expiration).');
+    this.logger.log(
+      'Idempotency cleanup completed (Redis TTL handles key expiration).',
+    );
   }
 }

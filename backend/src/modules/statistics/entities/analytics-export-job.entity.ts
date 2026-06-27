@@ -54,7 +54,11 @@ export class AnalyticsExportJob {
   @Column({ type: 'timestamp', nullable: true })
   toDate?: Date | null;
 
-  @Column({ type: 'varchar', length: 32, default: AnalyticsExportStatus.PENDING })
+  @Column({
+    type: 'varchar',
+    length: 32,
+    default: AnalyticsExportStatus.PENDING,
+  })
   status!: AnalyticsExportStatus;
 
   @Column({ type: 'varchar', length: 128, nullable: true })

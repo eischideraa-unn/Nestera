@@ -1,16 +1,16 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { headers } from "next/headers";
-import IntlProvider from "./i18n/provider";
-import en from "./locales/en.json";
-import es from "./locales/es.json";
+import './globals.css';
+import type { Metadata } from 'next';
+import { headers } from 'next/headers';
+import IntlProvider from './i18n/provider';
+import en from './locales/en.json';
+import es from './locales/es.json';
 
 const messages = { en, es };
-const defaultLocale = "en";
-const rtlLocales = ["ar", "he", "fa", "ur"];
+const defaultLocale = 'en';
+const rtlLocales = ['ar', 'he', 'fa', 'ur'];
 
 const getLocale = async () => {
-  const locale = (await headers()).get("x-nestera-locale") ?? defaultLocale;
+  const locale = (await headers()).get('x-nestera-locale') ?? defaultLocale;
   return locale in messages ? (locale as keyof typeof messages) : defaultLocale;
 };
 
@@ -24,20 +24,16 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: metadata.title,
       description: metadata.description,
-      type: "website",
+      type: 'website',
     },
   };
 }
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
 
   return (
-    <html lang={locale} dir={rtlLocales.includes(locale) ? "rtl" : "ltr"}>
+    <html lang={locale} dir={rtlLocales.includes(locale) ? 'rtl' : 'ltr'}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

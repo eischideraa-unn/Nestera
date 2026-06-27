@@ -82,7 +82,11 @@ export class DisputesController {
 
   @Patch(':id/investigate')
   @ApiOperation({ summary: 'Start investigation' })
-  @ApiResponse({ status: 200, description: 'Investigation started', type: Dispute })
+  @ApiResponse({
+    status: 200,
+    description: 'Investigation started',
+    type: Dispute,
+  })
   @ApiResponse({ status: 404, description: 'Dispute not found' })
   async startInvestigation(
     @Param('id') id: string,

@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Delete, UseGuards, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  UseGuards,
+  Param,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CacheStrategyService } from './cache-strategy.service';
 import { CacheWarmingService } from './cache-warming.service';
@@ -54,7 +61,9 @@ export class CacheController {
   }
 
   @Delete('invalidate/pattern/:pattern')
-  @ApiOperation({ summary: 'Invalidate all cache entries matching the given pattern' })
+  @ApiOperation({
+    summary: 'Invalidate all cache entries matching the given pattern',
+  })
   async invalidateByPattern(@Param('pattern') pattern: string) {
     await this.cacheStrategy.invalidateByPattern(pattern);
     return { message: `Invalidated all keys matching pattern: ${pattern}` };

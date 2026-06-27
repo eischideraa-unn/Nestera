@@ -14,16 +14,10 @@ import { UserGrowthMetrics } from './entities/user-growth-metrics.entity';
 import { TransactionMetrics } from './entities/transaction-metrics.entity';
 import { SavingsMetrics } from './entities/savings-metrics.entity';
 import { SystemHealthMetrics } from './entities/system-health-metrics.entity';
-import {
-  AnalyticsExportJob,
-} from './entities/analytics-export-job.entity';
+import { AnalyticsExportJob } from './entities/analytics-export-job.entity';
 import { User } from '../user/entities/user.entity';
-import {
-  Transaction,
-} from '../transactions/entities/transaction.entity';
-import {
-  UserSubscription,
-} from '../savings/entities/user-subscription.entity';
+import { Transaction } from '../transactions/entities/transaction.entity';
+import { UserSubscription } from '../savings/entities/user-subscription.entity';
 import { ANALYTICS_EXPORT_QUEUE } from './statistics-export.constants';
 
 @Module({

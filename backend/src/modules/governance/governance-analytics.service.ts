@@ -228,9 +228,10 @@ export class GovernanceAnalyticsService {
       const proposalsCreated = parseInt(stat.proposalsCreated || '0', 10);
       const passedProposals = parseInt(stat.passedProposals || '0', 10);
       const failedProposals = parseInt(stat.failedProposals || '0', 10);
-      const successRate = proposalsCreated > 0
-        ? Math.round((passedProposals / proposalsCreated) * 1000) / 10
-        : 0;
+      const successRate =
+        proposalsCreated > 0
+          ? Math.round((passedProposals / proposalsCreated) * 1000) / 10
+          : 0;
 
       return {
         templateId: stat.templateId,

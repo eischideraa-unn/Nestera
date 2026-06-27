@@ -1,8 +1,8 @@
-import React from "react";
-import Link from "next/link";
-import { Calendar, ChevronRight } from "lucide-react";
+import React from 'react';
+import Link from 'next/link';
+import { Calendar, ChevronRight } from 'lucide-react';
 
-export type GoalStatus = "On Track" | "At Risk" | "Completed" | "Paused";
+export type GoalStatus = 'On Track' | 'At Risk' | 'Completed' | 'Paused';
 
 interface GoalCardProps {
   title: string;
@@ -14,35 +14,33 @@ interface GoalCardProps {
   href?: string;
 }
 
-const STATUS_STYLES: Record<
-  GoalStatus,
-  { bg: string; border: string; dot: string; text: string }
-> = {
-  "On Track": {
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    dot: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]",
-    text: "text-emerald-400",
-  },
-  "At Risk": {
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-    dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]",
-    text: "text-amber-400",
-  },
-  Completed: {
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/30",
-    dot: "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.7)]",
-    text: "text-cyan-400",
-  },
-  Paused: {
-    bg: "bg-slate-500/10",
-    border: "border-slate-500/30",
-    dot: "bg-slate-400",
-    text: "text-slate-400",
-  },
-};
+const STATUS_STYLES: Record<GoalStatus, { bg: string; border: string; dot: string; text: string }> =
+  {
+    'On Track': {
+      bg: 'bg-emerald-500/10',
+      border: 'border-emerald-500/30',
+      dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]',
+      text: 'text-emerald-400',
+    },
+    'At Risk': {
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/30',
+      dot: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]',
+      text: 'text-amber-400',
+    },
+    Completed: {
+      bg: 'bg-cyan-500/10',
+      border: 'border-cyan-500/30',
+      dot: 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.7)]',
+      text: 'text-cyan-400',
+    },
+    Paused: {
+      bg: 'bg-slate-500/10',
+      border: 'border-slate-500/30',
+      dot: 'bg-slate-400',
+      text: 'text-slate-400',
+    },
+  };
 
 function formatMoney(value: number) {
   return `$${value.toLocaleString()}`;
@@ -55,7 +53,7 @@ export default function GoalCard({
   targetAmount,
   targetDate,
   status,
-  href = "#",
+  href = '#',
 }: GoalCardProps) {
   const percentage =
     targetAmount <= 0 ? 0 : Math.min(100, Math.round((currentAmount / targetAmount) * 100));
@@ -68,9 +66,7 @@ export default function GoalCard({
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-bold text-white m-0 tracking-tight truncate">
-              {title}
-            </h3>
+            <h3 className="text-lg font-bold text-white m-0 tracking-tight truncate">{title}</h3>
             <span className="px-2.5 py-1 bg-[#0e2330]/80 border border-white/10 rounded-lg text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
               {category}
             </span>
@@ -94,10 +90,8 @@ export default function GoalCard({
       <div className="mb-4">
         <div className="flex items-end justify-between gap-3">
           <p className="text-white font-bold m-0">
-            {formatMoney(currentAmount)}{" "}
-            <span className="text-[#5e8c96] font-medium">
-              / {formatMoney(targetAmount)}
-            </span>
+            {formatMoney(currentAmount)}{' '}
+            <span className="text-[#5e8c96] font-medium">/ {formatMoney(targetAmount)}</span>
           </p>
           <span className="text-[#5e8c96] text-xs font-semibold">{percentage}%</span>
         </div>
@@ -126,4 +120,3 @@ export default function GoalCard({
     </div>
   );
 }
-

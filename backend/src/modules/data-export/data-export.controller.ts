@@ -67,7 +67,11 @@ export class DataExportController {
 
   @Get('export/transactions')
   @ApiOperation({ summary: 'Export transaction history as JSON' })
-  @ApiQuery({ name: 'from', required: false, description: 'ISO date YYYY-MM-DD' })
+  @ApiQuery({
+    name: 'from',
+    required: false,
+    description: 'ISO date YYYY-MM-DD',
+  })
   @ApiQuery({ name: 'to', required: false, description: 'ISO date YYYY-MM-DD' })
   exportTransactions(
     @CurrentUser() user: { id: string },
@@ -104,7 +108,9 @@ export class DataExportController {
   // ─── Export history ───────────────────────────────────────────────────────
 
   @Get('export/history')
-  @ApiOperation({ summary: 'List all past export requests for the current user' })
+  @ApiOperation({
+    summary: 'List all past export requests for the current user',
+  })
   exportHistory(@CurrentUser() user: { id: string }) {
     return this.dataExportService.getExportHistory(user.id);
   }

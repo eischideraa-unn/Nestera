@@ -21,15 +21,14 @@ import { Request, Response } from 'express';
 @Injectable()
 export class CorrelationIdInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest<
-      Request & { correlationId?: string }
-    >();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { correlationId?: string }>();
     const response = context.switchToHttp().getResponse<Response>();
 
     // Ensure ID exists (middleware should have set this, but guard against it)
     if (!request.correlationId) {
-      const id =
-        (request.headers['x-correlation-id'] as string) || uuidv4();
+      const id = (request.headers['x-correlation-id'] as string) || uuidv4();
       request.correlationId = id;
       response.setHeader('x-correlation-id', id);
     }

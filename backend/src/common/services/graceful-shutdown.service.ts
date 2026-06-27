@@ -90,7 +90,7 @@ export class GracefulShutdownService implements BeforeApplicationShutdown {
       return;
     }
 
-    this.registeredHttpServer = server as ShutdownManagedServer;
+    this.registeredHttpServer = server;
     this.registeredHttpServer.on('connection', (socket: Socket) => {
       this.activeSockets.add(socket);
       socket.once('close', () => {
@@ -197,7 +197,9 @@ export class GracefulShutdownService implements BeforeApplicationShutdown {
         return 0;
       } catch (error) {
         const message =
-          error instanceof Error ? error.stack ?? error.message : String(error);
+          error instanceof Error
+            ? (error.stack ?? error.message)
+            : String(error);
         this.logger.error(`Graceful shutdown failed: ${message}`);
         await flushLogs?.();
         return 1;
@@ -284,7 +286,9 @@ export class GracefulShutdownService implements BeforeApplicationShutdown {
         });
         server.closeIdleConnections?.();
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING') {
+        if (
+          (error as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING'
+        ) {
           const message =
             error instanceof Error ? error.message : String(error);
           this.logger.error(`Failed to stop HTTP server: ${message}`);

@@ -11,12 +11,16 @@ interface WalletBalance {
 export function useWalletCache() {
   return {
     getCachedBalance: () => null,
-    setCachedBalance: () => { },
-    clearCache: () => { },
+    setCachedBalance: () => {},
+    clearCache: () => {},
   };
 }
 
-export function useWalletBalances(address?: string | null, network?: string | null, horizonUrl?: string | null) {
+export function useWalletBalances(
+  address?: string | null,
+  network?: string | null,
+  horizonUrl?: string | null,
+) {
   return {
     data: [] as WalletBalance[],
     isLoading: false,

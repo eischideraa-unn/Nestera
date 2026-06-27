@@ -89,9 +89,7 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
   private classifyException(exception: unknown): ClassifiedError {
     // 1. Check RPC errors
     if (this.isRpcError(exception)) {
-      const isTimeout = RPC_TIMEOUT_PATTERN.test(
-        (exception as Error).message,
-      );
+      const isTimeout = RPC_TIMEOUT_PATTERN.test(exception.message);
       return {
         code: isTimeout ? 'RPC_001' : 'RPC_002',
         originalException: exception,
@@ -100,7 +98,7 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
 
     // 2. Check database errors
     if (this.isDatabaseError(exception)) {
-      const dbCode = this.classifyDatabaseError(exception as Error);
+      const dbCode = this.classifyDatabaseError(exception);
       return {
         code: dbCode,
         originalException: exception,
@@ -202,7 +200,14 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
     // Connection errors
     if (
       DB_CONNECTION_PATTERNS.some((pattern) => pattern.test(message)) ||
-      ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', '57P01', '08001', '08006'].includes(code)
+      [
+        'ECONNREFUSED',
+        'ENOTFOUND',
+        'ETIMEDOUT',
+        '57P01',
+        '08001',
+        '08006',
+      ].includes(code)
     ) {
       return 'DB_001';
     }

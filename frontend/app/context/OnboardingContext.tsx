@@ -1,15 +1,8 @@
-"use client";
+'use client';
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-const ONBOARDING_STORAGE_KEY = "nestera-onboarding-completed";
+const ONBOARDING_STORAGE_KEY = 'nestera-onboarding-completed';
 
 interface OnboardingContextValue {
   isOnboardingCompleted: boolean;
@@ -27,9 +20,9 @@ interface OnboardingContextValue {
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
 function readInitialOnboardingState(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   try {
-    return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === "true";
+    return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true';
   } catch {
     return false;
   }
@@ -37,7 +30,7 @@ function readInitialOnboardingState(): boolean {
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(() =>
-    readInitialOnboardingState()
+    readInitialOnboardingState(),
   );
   const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -57,7 +50,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setIsOnboardingActive(false);
     setIsOnboardingCompleted(true);
     try {
-      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
+      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
     } catch {}
   }, []);
 
@@ -109,20 +102,16 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       prevStep,
       goToStep,
       skipOnboarding,
-    ]
+    ],
   );
 
-  return (
-    <OnboardingContext.Provider value={value}>
-      {children}
-    </OnboardingContext.Provider>
-  );
+  return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 }
 
 export function useOnboarding() {
   const context = useContext(OnboardingContext);
   if (!context) {
-    throw new Error("useOnboarding must be used within OnboardingProvider");
+    throw new Error('useOnboarding must be used within OnboardingProvider');
   }
   return context;
 }

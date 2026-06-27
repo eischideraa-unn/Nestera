@@ -100,7 +100,10 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       }
 
       if (error.children && error.children.length > 0) {
-        const childErrors = this.formatClassValidatorErrors(error.children, field);
+        const childErrors = this.formatClassValidatorErrors(
+          error.children,
+          field,
+        );
         result.push(...childErrors);
       }
     }

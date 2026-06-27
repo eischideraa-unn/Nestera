@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Put,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { EmailTemplatesService } from './email-templates.service';
 
 @Controller('email-templates')
@@ -46,7 +55,11 @@ export class EmailTemplatesController {
   }
 
   @Post('ab-tests/:id/preview')
-  previewAb(@Param('id') id: string, @Body() body: any, @Query('seed') seed?: string) {
+  previewAb(
+    @Param('id') id: string,
+    @Body() body: any,
+    @Query('seed') seed?: string,
+  ) {
     const s = seed ? Number(seed) : undefined;
     return this.svc.previewAbTest(id, body.variables ?? {}, s);
   }
