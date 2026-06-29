@@ -24,6 +24,9 @@ import { ExperimentsService } from './experiments.service';
 import { SavingsGroup } from './entities/savings-group.entity';
 import { SavingsGroupMember } from './entities/savings-group-member.entity';
 import { SavingsGroupActivity } from './entities/savings-group-activity.entity';
+import { GroupInvitation } from './entities/group-invitation.entity';
+import { ActivityTimeline } from './entities/activity-timeline.entity';
+import { MilestoneNotification } from './entities/milestone-notification.entity';
 import { GroupSavingsService } from './group-savings.service';
 import { GroupSavingsController } from './group-savings.controller';
 import { AutoDepositSchedule } from './entities/auto-deposit-schedule.entity';
@@ -37,12 +40,18 @@ import { SavingsGoalShare } from './entities/savings-goal-share.entity';
 import { SavingsGoalShareEvent } from './entities/savings-goal-share-event.entity';
 import { SavingsGoalSharingService } from './savings-goal-sharing.service';
 import { SavingsGoalSharingController } from './savings-goal-sharing.controller';
+import { ActivityTimelineService } from './services/activity-timeline.service';
+import { MilestoneNotificationEngineService } from './services/milestone-notification-engine.service';
+import { SavingsCalculatorService } from './services/savings-calculator.service';
+import { GroupPermissionGuard } from './guards/group-permission.guard';
 import { MailModule } from '../mail/mail.module';
+import { TransactionsModule } from '../transactions/transactions.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     MailModule,
+    TransactionsModule,
     TypeOrmModule.forFeature([
       SavingsProduct,
       UserSubscription,
@@ -59,6 +68,9 @@ import { MailModule } from '../mail/mail.module';
       SavingsGroup,
       SavingsGroupMember,
       SavingsGroupActivity,
+      GroupInvitation,
+      ActivityTimeline,
+      MilestoneNotification,
       AutoDepositSchedule,
       GoalTransferSchedule,
       GoalTransferExecution,
@@ -83,6 +95,10 @@ import { MailModule } from '../mail/mail.module';
     AutoDepositService,
     GoalTransferService,
     SavingsGoalSharingService,
+    ActivityTimelineService,
+    MilestoneNotificationEngineService,
+    SavingsCalculatorService,
+    GroupPermissionGuard,
   ],
   exports: [
     SavingsService,

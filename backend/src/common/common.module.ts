@@ -1,32 +1,31 @@
 import { Global, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PiiEncryptionService } from './services/pii-encryption.service';
 import { RateLimitMonitorService } from './services/rate-limit-monitor.service';
 import { SecretsConfigService } from './services/secrets-config.service';
-
-@Global()
-@Module({
-  providers: [
-    RateLimitMonitorService,
-    PiiEncryptionService,
-    SecretsConfigService,
 import { IdempotencyService } from './services/idempotency.service';
 import { IdempotencyCleanupService } from './services/idempotency-cleanup.service';
 import { LogSanitizerService } from './services/log-sanitizer.service';
 import { CompressionMetricsService } from './services/compression-metrics.service';
 import { CompressionMetricsMiddleware } from './middleware/compression.middleware';
+import { AuditLogService } from './services/audit-log.service';
 import { CacheModule } from '../modules/cache/cache.module';
+import { AuditLog } from './entities/audit-log.entity';
+import { DistributedLockModule } from './distributed-lock/distributed-lock.module';
 
 @Global()
 @Module({
-  imports: [CacheModule],
+  imports: [CacheModule, TypeOrmModule.forFeature([AuditLog])],
   providers: [
     RateLimitMonitorService,
     PiiEncryptionService,
+    SecretsConfigService,
     IdempotencyService,
     IdempotencyCleanupService,
     LogSanitizerService,
     CompressionMetricsService,
     CompressionMetricsMiddleware,
+    AuditLogService,
   ],
   exports: [
     RateLimitMonitorService,
@@ -35,6 +34,8 @@ import { CacheModule } from '../modules/cache/cache.module';
     IdempotencyService,
     LogSanitizerService,
     CompressionMetricsService,
+    AuditLogService,
+    DistributedLockModule,
   ],
 })
 export class CommonModule {}
