@@ -3,13 +3,16 @@ import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { CorrelationIdInterceptor } from './common/interceptors/correlation-id.interceptor';
 import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor';
 import { RequestLoggingInterceptor } from './common/interceptors/request-logging.interceptor';
 import { GracefulShutdownInterceptor } from './common/interceptors/graceful-shutdown.interceptor';
 import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
+import { AdminConfirmationInterceptor } from './common/interceptors/admin-confirmation.interceptor';
+import { AdminConfirmationFilter } from './common/filters/admin-confirmation.filter';
 import { TieredThrottlerGuard } from './common/guards/tiered-throttler.guard';
+import { AdminConfirmationGuard } from './common/guards/admin-confirmation.guard';
 import { CommonModule } from './common/common.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { LoggerModule } from 'nestjs-pino';
@@ -359,6 +362,13 @@ const envValidationSchema = Joi.object({
         ttl: 60_000, // 1 minute
         limit: 10,
       },
+      {
+        // Admin high-risk endpoints require confirmation and tight throttling.
+        // Intentionally restrictive: 2 requests per 5 minutes per admin.
+        name: 'admin-high-risk',
+        ttl: 5 * 60 * 1000, // 5 minutes
+        limit: 2,
+      },
     ]),
   ],
   controllers: [AppController],
@@ -368,6 +378,14 @@ const envValidationSchema = Joi.object({
     {
       provide: APP_GUARD,
       useClass: TieredThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AdminConfirmationGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AdminConfirmationFilter,
     },
     {
       provide: APP_INTERCEPTOR,
@@ -380,6 +398,11 @@ const envValidationSchema = Joi.object({
     {
       provide: APP_INTERCEPTOR,
       useClass: AuditLogInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AdminConfirmationInterceptor,
+      useClass: MetricsInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

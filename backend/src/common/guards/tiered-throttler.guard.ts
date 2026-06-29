@@ -34,9 +34,8 @@ const TIER_LIMITS: Record<
     auth: { limit: 5, ttl: 15 * 60 * 1000 },
     rpc: { limit: 5, ttl: 60000 },
     export: { limit: 1, ttl: 15 * 60 * 1000 },
-    // Free wallets can vote on at most 5 proposals per minute before hitting
-    // the limit; the DB + cache dedup prevents double-voting per proposal.
     vote: { limit: 5, ttl: 60_000 },
+    'admin-high-risk': { limit: 0, ttl: 5 * 60 * 1000 }, // Not allowed
   },
   [UserTier.VERIFIED]: {
     default: { limit: 150, ttl: 60000 },
@@ -44,6 +43,7 @@ const TIER_LIMITS: Record<
     rpc: { limit: 15, ttl: 60000 },
     export: { limit: 3, ttl: 15 * 60 * 1000 },
     vote: { limit: 10, ttl: 60_000 },
+    'admin-high-risk': { limit: 0, ttl: 5 * 60 * 1000 }, // Not allowed
   },
   [UserTier.PREMIUM]: {
     default: { limit: 300, ttl: 60000 },
@@ -51,6 +51,7 @@ const TIER_LIMITS: Record<
     rpc: { limit: 30, ttl: 60000 },
     export: { limit: 4, ttl: 15 * 60 * 1000 },
     vote: { limit: 20, ttl: 60_000 },
+    'admin-high-risk': { limit: 0, ttl: 5 * 60 * 1000 }, // Not allowed
   },
   [UserTier.ENTERPRISE]: {
     default: { limit: 1000, ttl: 60000 },
@@ -58,6 +59,7 @@ const TIER_LIMITS: Record<
     rpc: { limit: 100, ttl: 60000 },
     export: { limit: 8, ttl: 15 * 60 * 1000 },
     vote: { limit: 30, ttl: 60_000 },
+    'admin-high-risk': { limit: 0, ttl: 5 * 60 * 1000 }, // Not allowed
   },
   [UserTier.ADMIN]: {
     default: { limit: 1000, ttl: 60000 },
@@ -65,6 +67,7 @@ const TIER_LIMITS: Record<
     rpc: { limit: 100, ttl: 60000 },
     export: { limit: 6, ttl: 15 * 60 * 1000 },
     vote: { limit: 30, ttl: 60_000 },
+    'admin-high-risk': { limit: 2, ttl: 5 * 60 * 1000 }, // 2 per 5 minutes
   },
 };
 

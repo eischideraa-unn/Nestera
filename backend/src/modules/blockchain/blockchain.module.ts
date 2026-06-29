@@ -28,12 +28,14 @@ import { BalanceSyncService } from './balance-sync.service';
 import { JobQueueModule } from '../job-queue/job-queue.module';
 import { EventStreamBackpressureService } from './event-stream-backpressure.service';
 import { ProtocolMetrics } from '../admin-analytics/entities/protocol-metrics.entity';
+import { TransactionsModule } from '../transactions/transactions.module';
 
 @Global()
 @Module({
   imports: [
     HttpModule,
     JobQueueModule,
+    TransactionsModule,
     CacheModule.register({
       ttl: 300,
       max: 100,

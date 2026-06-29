@@ -8,8 +8,10 @@ import { NotificationProcessor } from './processors/notification.processor';
 import { EmailProcessor } from './processors/email.processor';
 import { BlockchainProcessor } from './processors/blockchain.processor';
 import { ReportProcessor } from './processors/report.processor';
+import { DisputeEvidenceProcessor } from './processors/dispute-evidence.processor';
 import { JobQueueService } from './job-queue.service';
 import { JobQueueController } from './job-queue.controller';
+import { DisputeEvidence } from '../disputes/entities/dispute-evidence.entity';
 
 const defaultJobOptions = {
   attempts: 3,
@@ -22,6 +24,7 @@ const defaultJobOptions = {
 @Module({
   imports: [
     TypeOrmModule.forFeature([Notification]),
+    TypeOrmModule.forFeature([DisputeEvidence]),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -63,6 +66,7 @@ const defaultJobOptions = {
         },
       },
       { name: QUEUE_NAMES.REPORTS, defaultJobOptions },
+      { name: QUEUE_NAMES.DISPUTE_EVIDENCE, defaultJobOptions },
     ),
   ],
   controllers: [JobQueueController],
@@ -72,6 +76,7 @@ const defaultJobOptions = {
     EmailProcessor,
     BlockchainProcessor,
     ReportProcessor,
+    DisputeEvidenceProcessor,
   ],
   exports: [JobQueueService, BullModule],
 })
