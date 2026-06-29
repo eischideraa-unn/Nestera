@@ -69,6 +69,7 @@ export class GracefulShutdownService implements BeforeApplicationShutdown {
 
   registerWorker(worker: BackgroundWorker): void {
     this.backgroundWorkers.push(worker);
+    this.logger.log(`Registered background worker: ${worker.name}`);
   }
 
   registerHttpServer(server: Server): void {

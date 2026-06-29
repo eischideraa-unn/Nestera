@@ -93,8 +93,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const requestId =
       ((request as unknown as Record<string, unknown>).correlationId as
-        | string
-        | undefined) ??
+        string | undefined) ??
       (request.headers['x-correlation-id'] as string) ??
       null;
     const timestamp = new Date().toISOString();
@@ -224,7 +223,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: status,
       correlationId:
         (request as Request & { correlationId?: string }).correlationId ??
-        request.headers['x-correlation-id'] ??
+        (request.headers['x-correlation-id'] as string | undefined) ??
         undefined,
       errorCode,
       message,
@@ -238,11 +237,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(status).json(body);
   }
 
-  private logError(
-    request: Request,
-    status: number,
-    exception: unknown,
-  ): void {
+  private logError(request: Request, status: number, exception: unknown): void {
     const msg =
       exception instanceof Error ? exception.message : String(exception);
     const stack = exception instanceof Error ? exception.stack : undefined;
