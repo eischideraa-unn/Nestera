@@ -3,10 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { existsSync, mkdirSync, writeFileSync, unlinkSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { createHmac, randomUUID } from 'crypto';
-import {
-  StorageProvider,
-  StoredFile,
-} from './storage-provider.interface';
+import { StorageProvider, StoredFile } from './storage-provider.interface';
 
 @Injectable()
 export class LocalStorageProvider implements StorageProvider {

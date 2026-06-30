@@ -132,7 +132,10 @@ export class HealthHistoryService {
       .select('DISTINCT record.service', 'service')
       .getRawMany<{ service: string }>();
 
-    const stats: Record<string, Awaited<ReturnType<typeof this.getServiceStats>>> = {};
+    const stats: Record<
+      string,
+      Awaited<ReturnType<typeof this.getServiceStats>>
+    > = {};
 
     for (const { service } of services) {
       stats[service] = await this.getServiceStats(service);

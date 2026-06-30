@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
-import { TransactionStateMachineService } from '../../../transactions/services/transaction-state-machine.service';
+import { TransactionStateMachineService } from '../../transactions/transaction-state-machine.service';
 import { xdr, nativeToScVal } from '@stellar/stellar-sdk';
 import { createHash } from 'crypto';
 import { DepositHandler } from './deposit.handler';
@@ -22,6 +22,13 @@ describe('DepositHandler', () => {
 
   const DEPOSIT_HASH = createHash('sha256').update('Deposit').digest('hex');
 
+  const stateMachineMock = {
+    createTransaction: jest.fn().mockResolvedValue({ id: 'tx-1' }),
+    transitionStatus: jest.fn().mockResolvedValue(undefined),
+    transition: jest.fn(),
+    getState: jest.fn(),
+  };
+
   beforeEach(async () => {
     entityManager = {
       getRepository: jest.fn().mockImplementation((entity) => {
@@ -41,6 +48,10 @@ describe('DepositHandler', () => {
       providers: [
         DepositHandler,
         { provide: DataSource, useValue: dataSource },
+        {
+          provide: TransactionStateMachineService,
+          useValue: stateMachineMock,
+        },
       ],
     }).compile();
 
@@ -106,11 +117,12 @@ describe('DepositHandler', () => {
       const result = await handler.handle(mockEvent);
 
       expect(result).toBe(true);
-      expect(txRepo.save).toHaveBeenCalledWith(
+      expect(stateMachineMock.createTransaction).toHaveBeenCalledWith(
         expect.objectContaining({
           type: LedgerTransactionType.DEPOSIT,
           amount: '500',
         }),
+        expect.any(Object),
       );
       expect(subRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -150,7 +162,7 @@ describe('DepositHandler', () => {
 
       const result = await handler.handle(symbolEvent);
       expect(result).toBe(true);
-      expect(txRepo.save).toHaveBeenCalled();
+      expect(stateMachineMock.createTransaction).toHaveBeenCalled();
     });
 
     it('should throw error if user not found', async () => {

@@ -185,7 +185,8 @@ export class DisputesController {
   @Post(':id/evidence')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Upload evidence file for a dispute (triggers background processing)',
+    summary:
+      'Upload evidence file for a dispute (triggers background processing)',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -218,7 +219,7 @@ export class DisputesController {
         ],
       }),
     )
-    file: Express.Multer.File,
+    file: any,
   ): Promise<DisputeEvidence> {
     return this.disputesService.uploadEvidence(id, file, dto);
   }

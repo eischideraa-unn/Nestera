@@ -11,10 +11,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { extname } from 'path';
 import { randomUUID } from 'crypto';
-import {
-  StorageProvider,
-  StoredFile,
-} from './storage-provider.interface';
+import { StorageProvider, StoredFile } from './storage-provider.interface';
 
 @Injectable()
 export class S3StorageProvider implements StorageProvider {
@@ -99,7 +96,7 @@ export class S3StorageProvider implements StorageProvider {
               : undefined,
           });
 
-    return getSignedUrl(this.s3, command, {
+    return (getSignedUrl as any)(this.s3, command, {
       expiresIn: options.expiresInSeconds,
     });
   }

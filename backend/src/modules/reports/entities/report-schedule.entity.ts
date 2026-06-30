@@ -66,6 +66,15 @@ export class ReportSchedule {
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean;
 
+  @Column({ type: 'varchar', nullable: true })
+  lastJobId: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  lastRunAt: Date | null;
+
+  @Column({ type: 'text', nullable: true })
+  lastError: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

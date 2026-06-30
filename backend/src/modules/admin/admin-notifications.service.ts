@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -244,10 +249,9 @@ export class AdminNotificationsService {
     }
 
     if (filter.channel) {
-      query.andWhere(
-        "notification.metadata->'channels' @> :channel",
-        { channel: JSON.stringify([filter.channel]) },
-      );
+      query.andWhere("notification.metadata->'channels' @> :channel", {
+        channel: JSON.stringify([filter.channel]),
+      });
     }
 
     const [notifications, total] = await query

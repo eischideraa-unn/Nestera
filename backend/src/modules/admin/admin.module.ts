@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bull';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UserModule } from '../user/user.module';
 import { SavingsModule } from '../savings/savings.module';
@@ -18,7 +19,6 @@ import { CircuitBreakerController } from './circuit-breaker.controller';
 import { AdminDisputesController } from './admin-disputes.controller';
 import { AdminAuditLogsController } from './admin-audit-logs.controller';
 import { AdminNotificationsController } from './admin-notifications.controller';
-
 import { AdminTransactionsController } from './admin-transactions.controller';
 
 import { AdminUsersService } from './admin-users.service';
@@ -29,6 +29,11 @@ import { AdminNotificationsService } from './admin-notifications.service';
 import { AdminNotificationRateLimiterService } from './admin-notification-rate-limiter.service';
 import { AdminTransactionsService } from './admin-transactions.service';
 import { AdminConfirmationService } from './admin-confirmation.service';
+import { AdminExportService } from './services/admin-export.service';
+import { AdminExportProcessor } from './processors/admin-export.processor';
+import { ADMIN_EXPORT_QUEUE } from './admin-export.constants';
+import { AdminExportJob } from './entities/admin-export-job.entity';
+import { DataScopeService } from '../../common/services/data-scope.service';
 import { AdminTransactionNote } from './entities/admin-transaction-note.entity';
 import { AdminConfirmation } from './entities/admin-confirmation.entity';
 import { User } from '../user/entities/user.entity';
@@ -57,7 +62,9 @@ import { JobQueueModule } from '../job-queue/job-queue.module';
       Dispute,
       DisputeTimeline,
       Notification,
+      AdminExportJob,
     ]),
+    BullModule.registerQueue({ name: ADMIN_EXPORT_QUEUE }),
     UserModule,
     SavingsModule,
     MailModule,
@@ -74,6 +81,9 @@ import { JobQueueModule } from '../job-queue/job-queue.module';
     AdminUsersController,
     AdminWithdrawalController,
     AdminNotificationsController,
+    AdminTransactionsController,
+    AdminDisputesController,
+    AdminAuditLogsController,
   ],
   providers: [
     AdminUsersService,
@@ -85,7 +95,15 @@ import { JobQueueModule } from '../job-queue/job-queue.module';
     AdminTransactionsService,
     AdminWithdrawalService,
     AdminConfirmationService,
+    AdminExportService,
+    AdminExportProcessor,
+    DataScopeService,
   ],
-  exports: [AdminDisputesService, AdminAuditLogsService, AdminConfirmationService],
+  exports: [
+    AdminDisputesService,
+    AdminAuditLogsService,
+    AdminConfirmationService,
+    AdminExportService,
+  ],
 })
 export class AdminModule {}

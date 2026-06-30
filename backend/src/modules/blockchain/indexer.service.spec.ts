@@ -12,6 +12,8 @@ import { WithdrawHandler } from './event-handlers/withdraw.handler';
 import { YieldHandler } from './event-handlers/yield.handler';
 import { IndexerCheckpointService } from './indexer-checkpoint.service';
 import { DistributedLockService } from '../../common/distributed-lock/distributed-lock.service';
+import { EventStreamBackpressureService } from './event-stream-backpressure.service';
+import { JobQueueService } from '../job-queue/job-queue.service';
 
 describe('IndexerService', () => {
   let service: IndexerService;
@@ -95,6 +97,20 @@ describe('IndexerService', () => {
         { provide: YieldHandler, useValue: { handle: jest.fn() } },
         { provide: IndexerCheckpointService, useValue: checkpointService },
         { provide: DistributedLockService, useValue: lockService },
+        {
+          provide: EventStreamBackpressureService,
+          useValue: {
+            shouldPauseIngestion: jest.fn().mockResolvedValue(false),
+            canIngestEvents: jest.fn().mockReturnValue(true),
+            getStatus: jest.fn(),
+          },
+        },
+        {
+          provide: JobQueueService,
+          useValue: {
+            addBlockchainJob: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 

@@ -8,7 +8,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -28,7 +33,10 @@ import {
 } from './indicators/external-services.health';
 import { StorageHealthIndicator } from './indicators/storage.health';
 import { SystemHealthIndicator } from './indicators/system.health';
-import { HealthHistoryService } from './health-history.service';
+import {
+  HealthHistoryService,
+  HealthCheckResult,
+} from './health-history.service';
 
 @ApiTags('Health')
 @Controller('health')
@@ -174,17 +182,18 @@ export class HealthController {
     const allHealthy = healthyCount === services.length;
     const timestamp = new Date();
 
-    const historyEntries = checks.map((check, index) => {
+    const historyEntries: HealthCheckResult[] = checks.map((check, index) => {
       const service = services[index];
       if (check.status === 'fulfilled') {
-        const entry = check.value[service] as Record<string, unknown> | undefined;
+        const entry = check.value[service] as
+          | Record<string, unknown>
+          | undefined;
         const status = (entry?.status as string) ?? 'up';
+        const normalizedStatus: HealthCheckResult['status'] =
+          status === 'up' ? 'up' : status === 'degraded' ? 'degraded' : 'down';
         return {
           service,
-          status: (status === 'up' ? 'up' : status === 'degraded' ? 'degraded' : 'down') as
-            | 'up'
-            | 'down'
-            | 'degraded',
+          status: normalizedStatus,
           responseTime: parseInt(String(entry?.responseTime ?? '0'), 10) || 0,
           timestamp,
           error: entry?.message as string | undefined,
@@ -192,7 +201,7 @@ export class HealthController {
       }
       return {
         service,
-        status: 'down' as const,
+        status: 'down',
         responseTime: 0,
         timestamp,
         error: check.reason?.message || 'Unknown error',

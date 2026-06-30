@@ -385,7 +385,7 @@ export class DisputesService {
    */
   async uploadEvidence(
     disputeId: string,
-    file: Express.Multer.File,
+    file: any,
     dto: UploadEvidenceDto,
   ): Promise<DisputeEvidence> {
     // Verify dispute exists
@@ -470,6 +470,8 @@ export class DisputesService {
       where: { disputeId },
       order: { createdAt: 'DESC' },
     });
+  }
+
   async reopenDispute(
     id: string,
     actor: string,

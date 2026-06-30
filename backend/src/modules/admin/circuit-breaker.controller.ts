@@ -53,7 +53,7 @@ export class CircuitBreakerController {
   dependencyFailures() {
     const metrics = this.circuitBreakerService.getMetrics();
 
-    if (!metrics) {
+    if (!metrics || !(metrics instanceof Map)) {
       return { items: [] };
     }
 
@@ -70,8 +70,8 @@ export class CircuitBreakerController {
 
     // Sort OPEN breakers first, then by failureRate desc
     items.sort((a, b) => {
-      const aOpen = a.state === 'OPEN' ? 1 : 0;
-      const bOpen = b.state === 'OPEN' ? 1 : 0;
+      const aOpen = String(a.state) === 'OPEN' ? 1 : 0;
+      const bOpen = String(b.state) === 'OPEN' ? 1 : 0;
       if (bOpen !== aOpen) return bOpen - aOpen;
       return b.failureRate - a.failureRate;
     });
@@ -96,7 +96,6 @@ export class CircuitBreakerController {
   }
 
   @Post(':name/open')
-
   @ApiOperation({
     summary: 'Manually open a circuit breaker',
     description: 'Manually trip a circuit breaker to prevent requests',

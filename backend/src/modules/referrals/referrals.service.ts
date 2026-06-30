@@ -9,7 +9,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { Referral, ReferralStatus } from './entities/referral.entity';
 import { ReferralCampaign } from './entities/referral-campaign.entity';
-import { ProcessedReferralEvent, ReferralEventType } from './entities/processed-referral-event.entity';
+import {
+  ProcessedReferralEvent,
+  ReferralEventType,
+} from './entities/processed-referral-event.entity';
 import { User } from '../user/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomBytes } from 'crypto';
@@ -38,8 +41,8 @@ export class ReferralsService {
    */
   private async hasEventBeenProcessed(
     eventType: ReferralEventType,
-    userId?: string,
-    referralId?: string,
+    userId?: string | null,
+    referralId?: string | null,
   ): Promise<boolean> {
     const query: any = { eventType };
     if (userId) query.userId = userId;
@@ -55,9 +58,9 @@ export class ReferralsService {
    */
   private async markEventAsProcessed(
     eventType: ReferralEventType,
-    userId?: string,
-    referralId?: string,
-    campaignId?: string,
+    userId?: string | null,
+    referralId?: string | null,
+    campaignId?: string | null,
     metadata?: Record<string, any>,
   ): Promise<void> {
     const event = this.processedEventRepository.create({
@@ -131,9 +134,7 @@ export class ReferralsService {
       refereeId,
     );
     if (alreadyProcessed) {
-      this.logger.log(
-        `Referral code already processed for user ${refereeId}`,
-      );
+      this.logger.log(`Referral code already processed for user ${refereeId}`);
       return;
     }
 
@@ -231,9 +232,7 @@ export class ReferralsService {
       userId,
     );
     if (alreadyProcessed) {
-      this.logger.log(
-        `First deposit already processed for user ${userId}`,
-      );
+      this.logger.log(`First deposit already processed for user ${userId}`);
       return;
     }
 
@@ -323,9 +322,7 @@ export class ReferralsService {
       referralId,
     );
     if (alreadyProcessed) {
-      this.logger.log(
-        `Rewards already distributed for referral ${referralId}`,
-      );
+      this.logger.log(`Rewards already distributed for referral ${referralId}`);
       return;
     }
 
@@ -346,9 +343,7 @@ export class ReferralsService {
         referralId,
         referral.campaignId,
       );
-      this.logger.log(
-        `Rewards already distributed for referral ${referralId}`,
-      );
+      this.logger.log(`Rewards already distributed for referral ${referralId}`);
       return;
     }
 

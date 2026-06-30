@@ -98,8 +98,25 @@ describe('GovernanceService', () => {
         { provide: SavingsService, useValue: savingsService },
         { provide: TransactionsService, useValue: transactionsService },
         { provide: EventEmitter2, useValue: eventEmitter },
-        { provide: ProposalLifecycleService, useValue: { assertValidVotingWindow: jest.fn(), verifyQuorumForQueue: jest.fn(), transitionTo: jest.fn(), finalizeVoting: jest.fn(), getTransitionHistory: jest.fn() } },
-        { provide: CacheStrategyService, useValue: { get: jest.fn(), set: jest.fn(), del: jest.fn(), wrap: jest.fn().mockImplementation((_k, fn) => fn()) } },
+        {
+          provide: ProposalLifecycleService,
+          useValue: {
+            assertValidVotingWindow: jest.fn(),
+            verifyQuorumForQueue: jest.fn(),
+            transitionTo: jest.fn(),
+            finalizeVoting: jest.fn(),
+            getTransitionHistory: jest.fn(),
+          },
+        },
+        {
+          provide: CacheStrategyService,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+            wrap: jest.fn().mockImplementation((_k, fn) => fn()),
+          },
+        },
         {
           provide: getRepositoryToken(GovernanceProposal),
           useValue: proposalRepo,
@@ -427,7 +444,7 @@ describe('GovernanceService', () => {
       voteRepo.findOneBy.mockResolvedValue({ id: 'v1' });
 
       await expect(service.castVote('user-1', 1, 'FOR' as any)).rejects.toThrow(
-        'User has already voted on this proposal',
+        'You have already voted on this proposal',
       );
     });
   });

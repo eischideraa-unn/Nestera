@@ -45,7 +45,7 @@ export class ReceiptService {
     // Store receipt with access control
     const verificationRef = this.generateVerificationRef(transaction);
     const accessKey = uuidv4();
-    
+
     const receipt = this.receiptRepository.create({
       userId,
       transactionId,
@@ -58,7 +58,9 @@ export class ReceiptService {
     });
 
     await this.receiptRepository.save(receipt);
-    this.logger.log(`Receipt generated and stored for transaction ${transactionId}`);
+    this.logger.log(
+      `Receipt generated and stored for transaction ${transactionId}`,
+    );
 
     return pdfBuffer;
   }
@@ -154,13 +156,17 @@ export class ReceiptService {
     doc.fontSize(11).font('Helvetica');
     this.addReceiptField(doc, 'Transaction Type', transaction.type);
     this.addReceiptField(doc, 'Amount', `${transaction.amount} XLM`);
-    this.addReceiptField(doc, 'Status', transaction.status);
+    this.addReceiptField(doc, 'Status', transaction.status ?? 'N/A');
     this.addReceiptField(doc, 'Transaction Hash', transaction.txHash || 'N/A');
     this.addReceiptField(doc, 'Event ID', transaction.eventId || 'N/A');
-    this.addReceiptField(doc, 'Ledger Sequence', transaction.ledgerSequence || 'N/A');
+    this.addReceiptField(
+      doc,
+      'Ledger Sequence',
+      transaction.ledgerSequence || 'N/A',
+    );
     this.addReceiptField(doc, 'Pool ID', transaction.poolId || 'N/A');
     this.addReceiptField(doc, 'Category', transaction.category || 'N/A');
-    
+
     if (transaction.tags && transaction.tags.length > 0) {
       this.addReceiptField(doc, 'Tags', transaction.tags.join(', '));
     }
@@ -192,24 +198,38 @@ export class ReceiptService {
     doc.moveDown(0.5);
 
     doc.fontSize(11).font('Helvetica');
-    this.addReceiptField(doc, 'Verification Reference', this.generateVerificationRef(transaction));
+    this.addReceiptField(
+      doc,
+      'Verification Reference',
+      this.generateVerificationRef(transaction),
+    );
     this.addReceiptField(doc, 'Generated At', new Date().toISOString());
 
     doc.moveDown();
 
     // Footer
-    doc.fontSize(9).font('Helvetica').text(
-      'This is an official receipt from Nestera. For verification purposes, please contact support@nestera.io.',
-      { align: 'center' },
-    );
+    doc
+      .fontSize(9)
+      .font('Helvetica')
+      .text(
+        'This is an official receipt from Nestera. For verification purposes, please contact support@nestera.io.',
+        { align: 'center' },
+      );
 
     doc.end();
 
     return Buffer.concat(chunks);
   }
 
-  private addReceiptField(doc: PDFDocument, label: string, value: string): void {
-    doc.fontSize(10).font('Helvetica-Bold').text(`${label}:`, { continued: true });
+  private addReceiptField(
+    doc: PDFDocument,
+    label: string,
+    value: string,
+  ): void {
+    doc
+      .fontSize(10)
+      .font('Helvetica-Bold')
+      .text(`${label}:`, { continued: true });
     doc.fontSize(10).font('Helvetica').text(` ${value}`);
     doc.moveDown(0.3);
   }

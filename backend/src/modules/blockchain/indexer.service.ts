@@ -118,7 +118,7 @@ export class IndexerService implements OnModuleInit {
           eventId,
           contractId: event.contractId ?? 'unknown',
           eventType: this.resolveEventType(event),
-          rawEvent: event as Record<string, unknown>,
+          rawEvent: event,
         });
         queued++;
 

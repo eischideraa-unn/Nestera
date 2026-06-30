@@ -25,6 +25,8 @@ import { ReportsService } from './reports.service';
 import { User } from '../user/entities/user.entity';
 import { MailService } from '../mail/mail.service';
 import { ShutdownTrackedTask } from '../../common/decorators/shutdown-task.decorator';
+import { JobQueueService } from '../job-queue/job-queue.service';
+import { DistributedLockService } from '../../common/distributed-lock/distributed-lock.service';
 
 @Injectable()
 export class ScheduledReportService {
@@ -41,6 +43,8 @@ export class ScheduledReportService {
     private readonly reportsService: ReportsService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    private readonly jobQueueService: JobQueueService,
+    private readonly distributedLockService: DistributedLockService,
   ) {
     this.archiveDir = path.resolve(
       __dirname,
@@ -100,16 +104,61 @@ export class ScheduledReportService {
   @ShutdownTrackedTask()
   @Cron(CronExpression.EVERY_HOUR)
   async processDueSchedules(): Promise<void> {
-    const now = new Date();
-    const due = await this.scheduleRepo
-      .createQueryBuilder('s')
-      .where('s.status = :status', { status: ReportScheduleStatus.ACTIVE })
-      .andWhere('s.nextRunAt <= :now', { now })
-      .getMany();
-
-    for (const schedule of due) {
-      await this.generateAndArchive(schedule);
+    const lock = await this.distributedLockService.acquireLock(
+      'report-scheduler',
+      {
+        ttlMs: 55_000,
+        maxRetries: 0,
+      },
+    );
+    if (!lock) {
+      this.logger.debug(
+        'Skipping report scheduler tick — lock held by another instance',
+      );
+      return;
     }
+
+    try {
+      const now = new Date();
+      const due = await this.scheduleRepo
+        .createQueryBuilder('s')
+        .where('s.status = :status', { status: ReportScheduleStatus.ACTIVE })
+        .andWhere('s.nextRunAt <= :now', { now })
+        .getMany();
+
+      for (const schedule of due) {
+        await this.enqueueScheduleJob(schedule);
+      }
+    } finally {
+      await lock.release();
+    }
+  }
+
+  async enqueueScheduleJob(schedule: ReportSchedule): Promise<void> {
+    const periodLabel = this.buildPeriodLabel(schedule);
+    const jobId = `schedule-${schedule.id}-${periodLabel}`;
+
+    const job = await this.jobQueueService.addReportJob(
+      {
+        scheduleId: schedule.id,
+        reportType: schedule.reportType,
+        userId: schedule.userId,
+        params: { periodLabel },
+      },
+      {
+        jobId,
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 5000 },
+      },
+    );
+
+    await this.scheduleRepo.update(schedule.id, {
+      lastJobId: String(job.id),
+    });
+
+    this.logger.log(
+      `Queued report job ${job.id} for schedule ${schedule.id} period=${periodLabel}`,
+    );
   }
 
   async generateAndArchive(schedule: ReportSchedule): Promise<ReportArchive> {

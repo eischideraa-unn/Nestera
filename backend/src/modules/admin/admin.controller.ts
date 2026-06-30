@@ -84,7 +84,8 @@ export class AdminController {
   @AdminHighRisk()
   @ApiOperation({
     summary: 'Update KYC status (approve or reject)',
-    description: 'High-risk operation. Requires confirmation on first attempt. Set `action` to `"approve"` or `"reject"`. Reason is required for rejection.',
+    description:
+      'High-risk operation. Requires confirmation on first attempt. Set `action` to `"approve"` or `"reject"`. Reason is required for rejection.',
   })
   @ApiResponse({ status: 200, description: 'KYC status updated' })
   @ApiResponse({

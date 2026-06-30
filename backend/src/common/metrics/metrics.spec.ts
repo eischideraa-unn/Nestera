@@ -60,8 +60,7 @@ describe('MetricsService', () => {
   });
 
   it('should calculate error rate', () => {
-    const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 3600000);
+    const start = new Date(Date.now() - 3600000);
 
     service.incrementCounter('http_requests_total', 90, {
       endpoint: '/api/test',
@@ -73,8 +72,8 @@ describe('MetricsService', () => {
     });
 
     const errorRate = service.getErrorRate('/api/test', {
-      start: oneHourAgo,
-      end: now,
+      start,
+      end: new Date(Date.now() + 1000),
     });
     expect(errorRate).toBe(10); // 10 errors out of 100 requests = 10%
   });

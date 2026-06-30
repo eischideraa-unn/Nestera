@@ -14,12 +14,15 @@ import {
 import { ReportsService } from './reports.service';
 import { User } from '../user/entities/user.entity';
 import { MailService } from '../mail/mail.service';
+import { JobQueueService } from '../job-queue/job-queue.service';
+import { DistributedLockService } from '../../common/distributed-lock/distributed-lock.service';
 
 const mockRepo = () => ({
   create: jest.fn((v) => v),
   save: jest.fn(),
   find: jest.fn(),
   findOne: jest.fn(),
+  update: jest.fn(),
   createQueryBuilder: jest.fn(),
 });
 
@@ -50,6 +53,20 @@ describe('ScheduledReportService', () => {
         {
           provide: ConfigService,
           useValue: { get: jest.fn() },
+        },
+        {
+          provide: JobQueueService,
+          useValue: {
+            addReportJob: jest.fn().mockResolvedValue({ id: 'job-1' }),
+          },
+        },
+        {
+          provide: DistributedLockService,
+          useValue: {
+            acquireLock: jest.fn().mockResolvedValue({
+              release: jest.fn(),
+            }),
+          },
         },
       ],
     }).compile();
@@ -92,6 +109,59 @@ describe('ScheduledReportService', () => {
       await expect(service.pauseSchedule('bad', 'u1')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('enqueueScheduleJob', () => {
+    it('queues a durable report job with deterministic id', async () => {
+      const jobQueue = {
+        addReportJob: jest.fn().mockResolvedValue({ id: 'job-42' }),
+      };
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          ScheduledReportService,
+          {
+            provide: getRepositoryToken(ReportSchedule),
+            useValue: scheduleRepo,
+          },
+          { provide: getRepositoryToken(ReportArchive), useValue: mockRepo() },
+          { provide: getRepositoryToken(User), useValue: mockRepo() },
+          {
+            provide: ReportsService,
+            useValue: {
+              generateTaxReportCSV: jest.fn(),
+              generatePdfBufferFromText: jest.fn(),
+            },
+          },
+          { provide: MailService, useValue: { sendReportEmail: jest.fn() } },
+          { provide: ConfigService, useValue: { get: jest.fn() } },
+          { provide: JobQueueService, useValue: jobQueue },
+          {
+            provide: DistributedLockService,
+            useValue: { acquireLock: jest.fn() },
+          },
+        ],
+      }).compile();
+      const svc = module.get<ScheduledReportService>(ScheduledReportService);
+
+      const schedule = {
+        id: 'sched-1',
+        userId: 'user-1',
+        reportType: ReportType.DAILY_SUMMARY,
+        format: ReportFormat.PDF,
+        frequency: ReportScheduleFrequency.DAILY,
+      };
+      scheduleRepo.update.mockResolvedValue(undefined);
+
+      await svc.enqueueScheduleJob(schedule as ReportSchedule);
+
+      expect(jobQueue.addReportJob).toHaveBeenCalledWith(
+        expect.objectContaining({ scheduleId: 'sched-1' }),
+        expect.objectContaining({ jobId: expect.stringContaining('sched-1') }),
+      );
+      expect(scheduleRepo.update).toHaveBeenCalledWith('sched-1', {
+        lastJobId: 'job-42',
+      });
     });
   });
 

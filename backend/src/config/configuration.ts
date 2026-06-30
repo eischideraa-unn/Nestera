@@ -226,7 +226,14 @@ export default () => ({
       process.env.UPLOAD_MAX_DOCUMENT_SIZE || String(10 * 1024 * 1024),
       10,
     ),
-    signedUrlTtlSeconds: parseInt(process.env.STORAGE_SIGNED_URL_TTL || '3600', 10),
+    maxBackupRestoreSize: parseInt(
+      process.env.UPLOAD_MAX_BACKUP_SIZE || String(1024 * 1024 * 1024),
+      10,
+    ),
+    signedUrlTtlSeconds: parseInt(
+      process.env.STORAGE_SIGNED_URL_TTL || '3600',
+      10,
+    ),
     s3Bucket: process.env.STORAGE_S3_BUCKET,
     s3Region: process.env.STORAGE_S3_REGION ?? 'us-east-1',
     awsAccessKeyId: process.env.STORAGE_AWS_ACCESS_KEY_ID,
@@ -298,5 +305,10 @@ export default () => ({
       process.env.REFERRAL_FRAUD_WITHDRAWAL_WINDOW_MS || '3600000',
       10,
     ),
+  },
+  compression: {
+    threshold: parseInt(process.env.COMPRESSION_THRESHOLD || '1024', 10),
+    jsonBodyLimit: process.env.JSON_BODY_LIMIT || '1mb',
+    urlencodedBodyLimit: process.env.URLENCODED_BODY_LIMIT || '1mb',
   },
 });

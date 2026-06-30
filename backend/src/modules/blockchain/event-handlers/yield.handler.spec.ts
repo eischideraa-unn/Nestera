@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
-import { TransactionStateMachineService } from '../../../transactions/services/transaction-state-machine.service';
+import { TransactionStateMachineService } from '../../transactions/transaction-state-machine.service';
 import { xdr, nativeToScVal } from '@stellar/stellar-sdk';
 import { createHash } from 'crypto';
 import { YieldHandler } from './yield.handler';
@@ -37,6 +37,13 @@ describe('YieldHandler', () => {
     create: jest.fn().mockImplementation((v) => v),
   };
 
+  const stateMachineMock = {
+    createTransaction: jest.fn().mockResolvedValue({ id: 'tx-1' }),
+    transitionStatus: jest.fn().mockResolvedValue(undefined),
+    transition: jest.fn(),
+    getState: jest.fn(),
+  };
+
   beforeEach(async () => {
     entityManager = {
       getRepository: jest.fn().mockImplementation((entity) => {
@@ -53,7 +60,14 @@ describe('YieldHandler', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [YieldHandler, { provide: DataSource, useValue: dataSource }, { provide: TransactionStateMachineService, useValue: { transition: jest.fn(), getState: jest.fn() } }],
+      providers: [
+        YieldHandler,
+        { provide: DataSource, useValue: dataSource },
+        {
+          provide: TransactionStateMachineService,
+          useValue: stateMachineMock,
+        },
+      ],
     }).compile();
 
     handler = module.get<YieldHandler>(YieldHandler);
@@ -98,13 +112,14 @@ describe('YieldHandler', () => {
       const result = await handler.handle(mockEvent);
 
       expect(result).toBe(true);
-      expect(txRepo.save).toHaveBeenCalledWith(
+      expect(stateMachineMock.createTransaction).toHaveBeenCalledWith(
         expect.objectContaining({
           type: LedgerTransactionType.YIELD,
           amount: '50',
-          status: LedgerTransactionStatus.COMPLETED,
         }),
+        expect.any(Object),
       );
+      expect(stateMachineMock.transitionStatus).toHaveBeenCalled();
       expect(entityManager.increment).toHaveBeenCalledWith(
         UserSubscription,
         { id: 'sub-id' },
@@ -129,7 +144,7 @@ describe('YieldHandler', () => {
 
       const result = await handler.handle(symbolEvent);
       expect(result).toBe(true);
-      expect(txRepo.save).toHaveBeenCalled();
+      expect(stateMachineMock.createTransaction).toHaveBeenCalled();
       expect(entityManager.increment).toHaveBeenCalled();
     });
 
@@ -156,11 +171,12 @@ describe('YieldHandler', () => {
 
       const result = await handler.handle(arrayEvent);
       expect(result).toBe(true);
-      expect(txRepo.save).toHaveBeenCalledWith(
+      expect(stateMachineMock.createTransaction).toHaveBeenCalledWith(
         expect.objectContaining({
           amount: '90',
           publicKey: 'G...',
         }),
+        expect.any(Object),
       );
       expect(entityManager.increment).toHaveBeenCalledWith(
         UserSubscription,
@@ -184,7 +200,7 @@ describe('YieldHandler', () => {
 
       const result = await handler.handle(mockEvent);
       expect(result).toBe(true);
-      expect(txRepo.save).toHaveBeenCalled();
+      expect(stateMachineMock.createTransaction).toHaveBeenCalled();
       expect(entityManager.increment).not.toHaveBeenCalled();
     });
 
@@ -194,7 +210,7 @@ describe('YieldHandler', () => {
 
       const result = await handler.handle(mockEvent);
       expect(result).toBe(true);
-      expect(txRepo.save).not.toHaveBeenCalled();
+      expect(stateMachineMock.createTransaction).not.toHaveBeenCalled();
       expect(entityManager.increment).not.toHaveBeenCalled();
     });
   });

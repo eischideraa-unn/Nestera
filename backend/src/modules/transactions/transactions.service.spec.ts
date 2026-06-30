@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { TransactionSavedSearch } from './entities/transaction-saved-search.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { TransactionsService } from './transactions.service';
+import { AutoCategorizationService } from './auto-categorization.service';
 import {
   LedgerTransaction,
   LedgerTransactionType,
@@ -13,13 +14,23 @@ import { Order } from '../../common/dto/page-options.dto';
 describe('TransactionsService', () => {
   let service: TransactionsService;
   let repository: Repository<LedgerTransaction>;
+  let mockSavedSearchRepository: {
+    find: jest.Mock;
+    findOne: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+    delete: jest.Mock;
+  };
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
+    addOrderBy: jest.fn().mockReturnThis(),
     skip: jest.fn().mockReturnThis(),
     take: jest.fn().mockReturnThis(),
+    getMany: jest.fn(),
+    getCount: jest.fn(),
     getManyAndCount: jest.fn(),
   };
 
@@ -28,6 +39,14 @@ describe('TransactionsService', () => {
   };
 
   beforeEach(async () => {
+    mockSavedSearchRepository = {
+      find: jest.fn(),
+      findOne: jest.fn(),
+      save: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TransactionsService,
@@ -37,7 +56,14 @@ describe('TransactionsService', () => {
         },
         {
           provide: getRepositoryToken(TransactionSavedSearch),
-          useValue: { find: jest.fn(), findOne: jest.fn(), save: jest.fn(), create: jest.fn(), delete: jest.fn() },
+          useValue: mockSavedSearchRepository,
+        },
+        {
+          provide: AutoCategorizationService,
+          useValue: {
+            categorize: jest.fn(),
+            listCategories: jest.fn().mockResolvedValue([]),
+          },
         },
       ],
     }).compile();
@@ -77,12 +103,11 @@ describe('TransactionsService', () => {
         page: 1,
         limit: 10,
         order: Order.DESC,
+        includeTotal: 'true',
       });
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([
-        mockTransactions as LedgerTransaction[],
-        1,
-      ]);
+      mockQueryBuilder.getMany.mockResolvedValue(mockTransactions);
+      mockQueryBuilder.getCount.mockResolvedValue(1);
 
       const result = await service.findAllForUser(userId, queryDto);
 
@@ -97,10 +122,10 @@ describe('TransactionsService', () => {
         'transaction.createdAt',
         'DESC',
       );
-      expect(result.data).toHaveLength(1);
-      expect(result.data[0].userId).toBe(userId);
-      expect(result.data[0].formattedDate).toBeDefined();
-      expect(result.data[0].formattedTime).toBeDefined();
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].userId).toBe(userId);
+      expect(result.items[0].formattedDate).toBeDefined();
+      expect(result.items[0].formattedTime).toBeDefined();
       expect(result.meta.totalItemCount).toBe(1);
     });
 
@@ -111,7 +136,7 @@ describe('TransactionsService', () => {
         type: [LedgerTransactionType.DEPOSIT, LedgerTransactionType.YIELD],
       });
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+      mockQueryBuilder.getMany.mockResolvedValue([]);
 
       await service.findAllForUser(userId, queryDto);
 
@@ -129,7 +154,7 @@ describe('TransactionsService', () => {
         endDate: '2024-12-31T23:59:59.999Z',
       });
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+      mockQueryBuilder.getMany.mockResolvedValue([]);
 
       await service.findAllForUser(userId, queryDto);
 
@@ -150,7 +175,7 @@ describe('TransactionsService', () => {
         poolId: 'pool-123',
       });
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+      mockQueryBuilder.getMany.mockResolvedValue([]);
 
       await service.findAllForUser(userId, queryDto);
 
@@ -166,20 +191,31 @@ describe('TransactionsService', () => {
         limit: 50,
       });
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+      mockQueryBuilder.getMany.mockResolvedValue([]);
 
       await service.findAllForUser(userId, queryDto);
 
       expect(mockQueryBuilder.skip).toHaveBeenCalledWith(50); // (page 2 - 1) * 50
-      expect(mockQueryBuilder.take).toHaveBeenCalledWith(50);
+      expect(mockQueryBuilder.take).toHaveBeenCalledWith(51);
     });
   });
 
   describe('createSavedSearch', () => {
     it('should create a saved search for a user', async () => {
       const userId = 'test-user-id';
-      const dto = { name: 'My Search', filters: { type: ['DEPOSIT'] }, isDefault: false };
-      const savedSearch = { id: '1', userId, ...dto, createdAt: new Date() };
+      const dto = {
+        name: 'My Search',
+        query: { type: ['DEPOSIT'] },
+        isDefault: false,
+      };
+      const savedSearch = {
+        id: '1',
+        userId,
+        ...dto,
+        description: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
       mockSavedSearchRepository.create.mockReturnValue(savedSearch);
       mockSavedSearchRepository.save.mockResolvedValue(savedSearch);
@@ -197,7 +233,16 @@ describe('TransactionsService', () => {
     it('should return saved searches for a user', async () => {
       const userId = 'test-user-id';
       const searches = [
-        { id: '1', userId, name: 'Search 1', filters: {}, isDefault: false, createdAt: new Date() },
+        {
+          id: '1',
+          userId,
+          name: 'Search 1',
+          query: {},
+          description: null,
+          isDefault: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ];
 
       mockSavedSearchRepository.find.mockResolvedValue(searches);
@@ -222,13 +267,22 @@ describe('TransactionsService', () => {
       const userId = 'test-user-id';
       const id = 'search-1';
       const dto = { name: 'Updated Search' };
-      const existing = { id, userId, name: 'Old Search', filters: {}, isDefault: false };
+      const existing = {
+        id,
+        userId,
+        name: 'Old Search',
+        query: {},
+        description: null,
+        isDefault: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       const updated = { ...existing, ...dto };
 
       mockSavedSearchRepository.findOne.mockResolvedValue(existing);
       mockSavedSearchRepository.save.mockResolvedValue(updated);
 
-      const result = await service.updateSavedSearch(userId, id, dto as any);
+      const result = await service.updateSavedSearch(userId, id, dto);
 
       expect(mockSavedSearchRepository.findOne).toHaveBeenCalledWith(
         expect.objectContaining({ where: { id, userId } }),
@@ -238,7 +292,7 @@ describe('TransactionsService', () => {
 
     it('should return error when saved search not found', async () => {
       mockSavedSearchRepository.findOne.mockResolvedValue(null);
-      const result = await service.updateSavedSearch('user-id', 'bad-id', {} as any);
+      const result = await service.updateSavedSearch('user-id', 'bad-id', {});
       expect(result).toEqual(expect.objectContaining({ ok: false }));
     });
   });
@@ -247,14 +301,23 @@ describe('TransactionsService', () => {
     it('should delete a saved search belonging to the user', async () => {
       const userId = 'test-user-id';
       const id = 'search-1';
-      const existing = { id, userId, name: 'Search', filters: {}, isDefault: false };
+      const existing = {
+        id,
+        userId,
+        name: 'Search',
+        filters: {},
+        isDefault: false,
+      };
 
       mockSavedSearchRepository.findOne.mockResolvedValue(existing);
       mockSavedSearchRepository.delete.mockResolvedValue({ affected: 1 });
 
       await service.deleteSavedSearch(userId, id);
 
-      expect(mockSavedSearchRepository.delete).toHaveBeenCalledWith({ id, userId });
+      expect(mockSavedSearchRepository.delete).toHaveBeenCalledWith({
+        id,
+        userId,
+      });
     });
   });
 });

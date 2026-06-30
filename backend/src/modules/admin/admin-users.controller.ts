@@ -46,7 +46,9 @@ export class AdminUsersController {
     status: 200,
     description: 'Paginated user list with savings and transaction totals',
   })
-  listUsers(@Query() query: AdminUsersQueryDto): Promise<PageDto<AdminUserListItemDto>> {
+  listUsers(
+    @Query() query: AdminUsersQueryDto,
+  ): Promise<PageDto<AdminUserListItemDto>> {
     return this.adminUsersService.listUsers(query);
   }
 

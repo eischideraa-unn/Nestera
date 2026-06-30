@@ -16,7 +16,7 @@ import { WaitlistService } from './waitlist.service';
 import { WithdrawalRequest } from './entities/withdrawal-request.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
 import { AuditLogService } from '../../common/services/audit-log.service';
-import { TransactionStateMachineService } from '../../transactions/services/transaction-state-machine.service';
+import { TransactionStateMachineService } from '../transactions/transaction-state-machine.service';
 
 describe('SavingsService', () => {
   let service: SavingsService;
@@ -67,7 +67,10 @@ describe('SavingsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SavingsService,
-        { provide: TransactionStateMachineService, useValue: { transition: jest.fn(), getState: jest.fn() } },
+        {
+          provide: TransactionStateMachineService,
+          useValue: { transition: jest.fn(), getState: jest.fn() },
+        },
         {
           provide: getRepositoryToken(SavingsProduct),
           useValue: productRepository,

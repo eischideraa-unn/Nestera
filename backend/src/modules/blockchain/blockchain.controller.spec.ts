@@ -3,6 +3,7 @@ import { BlockchainController } from './blockchain.controller';
 import { StellarService } from './stellar.service';
 import { BalanceSyncService } from './balance-sync.service';
 import { IndexerService } from './indexer.service';
+import { EventStreamBackpressureService } from './event-stream-backpressure.service';
 import { TransactionDto } from './dto/transaction.dto';
 
 const MOCK_PUBLIC_KEY =
@@ -48,6 +49,12 @@ describe('BlockchainController', () => {
         { provide: StellarService, useValue: mockStellarService },
         { provide: BalanceSyncService, useValue: mockBalanceSyncService },
         { provide: IndexerService, useValue: mockIndexerService },
+        {
+          provide: EventStreamBackpressureService,
+          useValue: {
+            getStatus: jest.fn().mockResolvedValue({}),
+          },
+        },
       ],
     }).compile();
 

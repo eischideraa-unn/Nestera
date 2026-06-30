@@ -128,13 +128,23 @@ describe('Statistics API (e2e)', () => {
                 ),
               };
             }),
-            requestExportJob: jest.fn(async (userId, dataType, body) => ({
-              requestId: 'job-1',
-              status: AnalyticsExportStatus.PENDING,
-              dataType,
-              format: body.format ?? AnalyticsExportFormat.JSON,
-              createdAt: new Date(),
-            })),
+            requestExportJob: jest.fn(async (userId, dataType, body) => {
+              const format = body.format ?? AnalyticsExportFormat.JSON;
+              if (!['json', 'csv', 'xlsx'].includes(format)) {
+                throw new BadRequestException(
+                  'Invalid analytics export format',
+                );
+              }
+
+              return {
+                requestId: 'job-1',
+                status: AnalyticsExportStatus.PENDING,
+                dataType,
+                format,
+                range: body?.range ?? '30d',
+                createdAt: new Date(),
+              };
+            }),
             getExportJobStatus: jest.fn(async () => ({
               requestId: 'job-1',
               status: AnalyticsExportStatus.PENDING,
@@ -702,7 +712,8 @@ describe('Statistics API (e2e)', () => {
         .expect(HttpStatus.ACCEPTED);
 
       expect(response.body.dataType).toBe('all');
-      expect(response.body.sections).toBeDefined();
+      expect(response.body.requestId).toBe('job-1');
+      expect(response.body.status).toBe(AnalyticsExportStatus.PENDING);
     });
 
     it('should export user statistics in CSV format', async () => {
@@ -712,8 +723,9 @@ describe('Statistics API (e2e)', () => {
         .query({ format: 'csv' })
         .expect(HttpStatus.ACCEPTED);
 
-      expect(response.header['content-type']).toContain('text/csv');
-      expect(response.text).toContain('section,totalUsers,totalTransactions');
+      expect(response.body.dataType).toBe('users');
+      expect(response.body.format).toBe('csv');
+      expect(response.body.status).toBe(AnalyticsExportStatus.PENDING);
     });
 
     it('should export analytics in xlsx format', async () => {
@@ -721,11 +733,10 @@ describe('Statistics API (e2e)', () => {
         .get('/admin/statistics/export/all')
         .set('Authorization', adminToken)
         .query({ format: 'xlsx' })
-        .expect(HttpStatus.OK);
+        .expect(HttpStatus.ACCEPTED);
 
-      expect(response.header['content-type']).toContain(
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      );
+      expect(response.body.format).toBe('xlsx');
+      expect(response.body.status).toBe(AnalyticsExportStatus.PENDING);
     });
 
     it('should queue an export job', async () => {
@@ -749,7 +760,7 @@ describe('Statistics API (e2e)', () => {
           fromDate: '2024-01-01',
           toDate: '2024-01-31',
         })
-        .expect(HttpStatus.OK);
+        .expect(HttpStatus.ACCEPTED);
 
       expect(response.body.range).toBe('custom');
       expect(response.body.dataType).toBe('transactions');

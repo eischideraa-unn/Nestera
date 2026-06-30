@@ -106,9 +106,7 @@ export class AdminConfirmationService {
   /**
    * Get pending confirmations for an admin.
    */
-  async getPendingConfirmations(
-    adminId: string,
-  ): Promise<AdminConfirmation[]> {
+  async getPendingConfirmations(adminId: string): Promise<AdminConfirmation[]> {
     return this.confirmationRepo.find({
       where: {
         adminId,

@@ -53,6 +53,12 @@ describe('StorageAccessService', () => {
   });
 
   it('generates verifiable local signed URLs', async () => {
+    service.registerAccessRule({
+      key: 'files/test.pdf',
+      ownerId: 'user-1',
+      visibility: 'private',
+    });
+
     const url = await service.getSignedDownloadUrl('files/test.pdf', 'user-1');
     expect(url).toContain('/api/storage/signed?');
     expect(url).toContain('sig=');

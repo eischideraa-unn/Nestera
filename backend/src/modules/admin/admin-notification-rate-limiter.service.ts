@@ -10,7 +10,9 @@ export interface RateLimitResult {
 
 @Injectable()
 export class AdminNotificationRateLimiterService {
-  private readonly logger = new Logger(AdminNotificationRateLimiterService.name);
+  private readonly logger = new Logger(
+    AdminNotificationRateLimiterService.name,
+  );
 
   private readonly maxPerMinute: number;
   private readonly maxPerHour: number;
@@ -84,7 +86,9 @@ export class AdminNotificationRateLimiterService {
 
     const lastSent = this.recentHashes.get(hash);
     if (lastSent && now - lastSent < this.dedupWindowMs) {
-      this.logger.debug(`Duplicate notification blocked (hash=${hash.slice(0, 8)})`);
+      this.logger.debug(
+        `Duplicate notification blocked (hash=${hash.slice(0, 8)})`,
+      );
       return true;
     }
 
@@ -92,7 +96,10 @@ export class AdminNotificationRateLimiterService {
     return false;
   }
 
-  validateScheduleConfig(scheduledAt: string, timezone?: string): {
+  validateScheduleConfig(
+    scheduledAt: string,
+    timezone?: string,
+  ): {
     valid: boolean;
     error?: string;
   } {
@@ -107,7 +114,10 @@ export class AdminNotificationRateLimiterService {
 
     const maxFutureMs = 90 * 24 * 60 * 60 * 1000;
     if (scheduled.getTime() - Date.now() > maxFutureMs) {
-      return { valid: false, error: 'scheduledAt cannot be more than 90 days in the future' };
+      return {
+        valid: false,
+        error: 'scheduledAt cannot be more than 90 days in the future',
+      };
     }
 
     if (timezone) {
@@ -136,7 +146,10 @@ export class AdminNotificationRateLimiterService {
       return { valid: false, error: 'Title must be 200 characters or fewer' };
     }
     if (message.length > 5000) {
-      return { valid: false, error: 'Message must be 5000 characters or fewer' };
+      return {
+        valid: false,
+        error: 'Message must be 5000 characters or fewer',
+      };
     }
     if (channels && channels.length === 0) {
       return { valid: false, error: 'At least one channel is required' };

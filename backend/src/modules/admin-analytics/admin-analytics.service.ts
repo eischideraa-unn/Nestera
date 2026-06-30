@@ -33,6 +33,8 @@ import {
   DateRange,
 } from '../admin/dto/admin-analytics.dto';
 import { ShutdownTrackedTask } from '../../common/decorators/shutdown-task.decorator';
+import { DataScopeService } from '../../common/services/data-scope.service';
+import { Role } from '../../common/enums/role.enum';
 
 @Injectable()
 export class AdminAnalyticsService {

@@ -10,7 +10,10 @@ import {
   AggregationJobStatus,
   BackfillStatus,
 } from '../entities/analytics-aggregation-job.entity';
-import { CreateAggregationJobDto, BackfillAggregationJobDto } from '../dto/analytics-aggregation.dto';
+import {
+  CreateAggregationJobDto,
+  BackfillAggregationJobDto,
+} from '../dto/analytics-aggregation.dto';
 import { UserGrowthMetrics } from '../entities/user-growth-metrics.entity';
 import { TransactionMetrics } from '../entities/transaction-metrics.entity';
 import { SavingsMetrics } from '../entities/savings-metrics.entity';
@@ -51,7 +54,9 @@ export class AnalyticsAggregationService {
       backfillStartDate: dto.backfillStartDate
         ? new Date(dto.backfillStartDate)
         : null,
-      backfillEndDate: dto.backfillEndDate ? new Date(dto.backfillEndDate) : null,
+      backfillEndDate: dto.backfillEndDate
+        ? new Date(dto.backfillEndDate)
+        : null,
       metadata: dto.metadata,
       status: AggregationJobStatus.PENDING,
     });
@@ -59,8 +64,8 @@ export class AnalyticsAggregationService {
     if (dto.isBackfill) {
       job.backfillStatus = BackfillStatus.NOT_STARTED;
       const periods = this.calculateBackfillPeriods(
-        dto.backfillStartDate,
-        dto.backfillEndDate,
+        dto.backfillStartDate!,
+        dto.backfillEndDate!,
         dto.period,
       );
       job.totalBackfillPeriods = periods;
@@ -93,7 +98,8 @@ export class AnalyticsAggregationService {
     } catch (error) {
       await this.aggregationJobRepository.update(saved.id, {
         status: AggregationJobStatus.FAILED,
-        errorMessage: error instanceof Error ? error.message : 'Failed to queue job',
+        errorMessage:
+          error instanceof Error ? error.message : 'Failed to queue job',
       });
       throw error;
     }
@@ -150,7 +156,8 @@ export class AnalyticsAggregationService {
       await this.aggregationJobRepository.update(saved.id, {
         status: AggregationJobStatus.FAILED,
         backfillStatus: BackfillStatus.FAILED,
-        errorMessage: error instanceof Error ? error.message : 'Failed to queue job',
+        errorMessage:
+          error instanceof Error ? error.message : 'Failed to queue job',
       });
       throw error;
     }
@@ -194,7 +201,7 @@ export class AnalyticsAggregationService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      
+
       await this.aggregationJobRepository.update(job.id, {
         status: AggregationJobStatus.FAILED,
         errorMessage,
@@ -212,7 +219,9 @@ export class AnalyticsAggregationService {
     }
   }
 
-  private async processBackfillJob(job: AnalyticsAggregationJob): Promise<void> {
+  private async processBackfillJob(
+    job: AnalyticsAggregationJob,
+  ): Promise<void> {
     await this.aggregationJobRepository.update(job.id, {
       backfillStatus: BackfillStatus.IN_PROGRESS,
     });
@@ -238,7 +247,9 @@ export class AnalyticsAggregationService {
         );
 
         processedCount++;
-        completedPeriods.push(`${period.start.toISOString()}-${period.end.toISOString()}`);
+        completedPeriods.push(
+          `${period.start.toISOString()}-${period.end.toISOString()}`,
+        );
 
         await this.aggregationJobRepository.update(job.id, {
           processedBackfillPeriods: processedCount,
@@ -252,7 +263,9 @@ export class AnalyticsAggregationService {
         });
       } catch (error) {
         failedCount++;
-        failedPeriods.push(`${period.start.toISOString()}-${period.end.toISOString()}`);
+        failedPeriods.push(
+          `${period.start.toISOString()}-${period.end.toISOString()}`,
+        );
         this.logger.error(
           `Failed to aggregate period ${period.start.toISOString()}: ${error}`,
         );
@@ -281,7 +294,8 @@ export class AnalyticsAggregationService {
   }
 
   private async processRegularJob(job: AnalyticsAggregationJob): Promise<void> {
-    const startDate = job.startDate || new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const startDate =
+      job.startDate || new Date(Date.now() - 24 * 60 * 60 * 1000);
     const endDate = job.endDate || new Date();
 
     const result = await this.aggregateForPeriod(
@@ -293,7 +307,7 @@ export class AnalyticsAggregationService {
 
     await this.aggregationJobRepository.update(job.id, {
       recordsProcessed: result.recordsProcessed,
-      result: result.summary,
+      result: result.summary as any,
     });
   }
 
@@ -315,7 +329,7 @@ export class AnalyticsAggregationService {
       case AggregationType.SYSTEM_STATISTICS:
         return this.aggregateSystemStatistics(period, startDate, endDate);
       default:
-        throw new Error(`Unknown aggregation type: ${aggregationType}`);
+        throw new Error(`Unknown aggregation type: ${String(aggregationType)}`);
     }
   }
 
@@ -327,7 +341,7 @@ export class AnalyticsAggregationService {
     const existingMetrics = await this.userGrowthRepository.find({
       where: {
         date: Between(startDate, endDate),
-        metricPeriod: period,
+        metricPeriod: this.toMetricPeriod(period),
       },
     });
 
@@ -343,13 +357,14 @@ export class AnalyticsAggregationService {
     const activeUsers = Math.floor(totalUsers * 0.8);
     const inactiveUsers = totalUsers - activeUsers;
     const churnedUsers = Math.floor(Math.random() * 5);
-    const retentionRate = activeUsers > 0 ? ((activeUsers - churnedUsers) / activeUsers) * 100 : 0;
+    const retentionRate =
+      activeUsers > 0 ? ((activeUsers - churnedUsers) / activeUsers) * 100 : 0;
     const churnRate = totalUsers > 0 ? (churnedUsers / totalUsers) * 100 : 0;
     const growthRate = totalUsers > 0 ? (newUsersCount / totalUsers) * 100 : 0;
 
     const metric = this.userGrowthRepository.create({
       date: metricDate,
-      metricPeriod: period,
+      metricPeriod: this.toMetricPeriod(period),
       totalUsers,
       newUsersCount,
       activeUsers,
@@ -394,7 +409,7 @@ export class AnalyticsAggregationService {
 
     const metric = this.transactionMetricsRepository.create({
       date: metricDate,
-      metricPeriod: period,
+      metricPeriod: this.toMetricPeriod(period),
       totalTransactions,
       successfulTransactions,
       failedTransactions,
@@ -407,9 +422,17 @@ export class AnalyticsAggregationService {
       failureRate,
       avgGasUsed: 100,
       totalGasSpent: totalTransactions * 100,
-      transactionsByType: { deposit: 0.4, withdrawal: 0.3, transfer: 0.2, swap: 0.1 },
+      transactionsByType: {
+        deposit: 0.4,
+        withdrawal: 0.3,
+        transfer: 0.2,
+        swap: 0.1,
+      },
       transactionsByStatus: { completed: successRate, failed: failureRate },
-      volumeByType: { deposit: totalVolume * 0.4, withdrawal: totalVolume * 0.3 },
+      volumeByType: {
+        deposit: totalVolume * 0.4,
+        withdrawal: totalVolume * 0.3,
+      },
     });
 
     await this.transactionMetricsRepository.save(metric);
@@ -443,7 +466,7 @@ export class AnalyticsAggregationService {
 
     const metric = this.savingsMetricsRepository.create({
       date: metricDate,
-      metricPeriod: period,
+      metricPeriod: this.toMetricPeriod(period),
       totalAccounts,
       activeAccounts,
       newAccounts,
@@ -455,11 +478,22 @@ export class AnalyticsAggregationService {
       minApy: avgApy - 1,
       maxApy: avgApy + 2,
       totalInterestEarned,
-      accountGrowthRate: totalAccounts > 0 ? (newAccounts / totalAccounts) * 100 : 0,
-      tvlGrowthRate: totalValueLocked > 0 ? ((inflow - outflow) / totalValueLocked) * 100 : 0,
+      accountGrowthRate:
+        totalAccounts > 0 ? (newAccounts / totalAccounts) * 100 : 0,
+      tvlGrowthRate:
+        totalValueLocked > 0
+          ? ((inflow - outflow) / totalValueLocked) * 100
+          : 0,
       accountsByProduct: { savings: 0.6, staking: 0.3, liquidity: 0.1 },
-      tvlByProduct: { savings: totalValueLocked * 0.6, staking: totalValueLocked * 0.3 },
-      apyByProduct: { savings: avgApy, staking: avgApy + 1, liquidity: avgApy - 0.5 },
+      tvlByProduct: {
+        savings: totalValueLocked * 0.6,
+        staking: totalValueLocked * 0.3,
+      },
+      apyByProduct: {
+        savings: avgApy,
+        staking: avgApy + 1,
+        liquidity: avgApy - 0.5,
+      },
     });
 
     await this.savingsMetricsRepository.save(metric);
@@ -546,7 +580,7 @@ export class AnalyticsAggregationService {
 
     const metric = this.systemStatisticsRepository.create({
       timestamp: metricDate,
-      metricType: 'system_overview',
+      metricType: this.toSystemMetricType(period),
       totalUsers,
       activeUsers,
       newUsersCount,
@@ -644,6 +678,39 @@ export class AnalyticsAggregationService {
     return periods;
   }
 
+  private toMetricPeriod(
+    period: AggregationPeriod,
+  ): 'daily' | 'weekly' | 'monthly' | 'yearly' {
+    switch (period) {
+      case AggregationPeriod.HOURLY:
+      case AggregationPeriod.DAILY:
+        return 'daily';
+      case AggregationPeriod.WEEKLY:
+        return 'weekly';
+      case AggregationPeriod.MONTHLY:
+        return 'monthly';
+      default:
+        return 'daily';
+    }
+  }
+
+  private toSystemMetricType(
+    period: AggregationPeriod,
+  ): 'daily' | 'hourly' | 'weekly' | 'monthly' {
+    switch (period) {
+      case AggregationPeriod.HOURLY:
+        return 'hourly';
+      case AggregationPeriod.DAILY:
+        return 'daily';
+      case AggregationPeriod.WEEKLY:
+        return 'weekly';
+      case AggregationPeriod.MONTHLY:
+        return 'monthly';
+      default:
+        return 'daily';
+    }
+  }
+
   private getMetricDate(period: AggregationPeriod, date: Date): Date {
     const metricDate = new Date(date);
 
@@ -654,11 +721,12 @@ export class AnalyticsAggregationService {
       case AggregationPeriod.DAILY:
         metricDate.setHours(0, 0, 0, 0);
         break;
-      case AggregationPeriod.WEEKLY:
+      case AggregationPeriod.WEEKLY: {
         const dayOfWeek = metricDate.getDay();
         metricDate.setDate(metricDate.getDate() - dayOfWeek);
         metricDate.setHours(0, 0, 0, 0);
         break;
+      }
       case AggregationPeriod.MONTHLY:
         metricDate.setDate(1);
         metricDate.setHours(0, 0, 0, 0);
@@ -687,9 +755,16 @@ export class AnalyticsAggregationService {
     page?: number;
     limit?: number;
   }): Promise<{ jobs: AnalyticsAggregationJob[]; total: number }> {
-    const { aggregationType, status, isBackfill, page = 1, limit = 20 } = filters;
+    const {
+      aggregationType,
+      status,
+      isBackfill,
+      page = 1,
+      limit = 20,
+    } = filters;
 
-    const queryBuilder = this.aggregationJobRepository.createQueryBuilder('job');
+    const queryBuilder =
+      this.aggregationJobRepository.createQueryBuilder('job');
 
     if (aggregationType) {
       queryBuilder.andWhere('job.aggregationType = :aggregationType', {
@@ -732,7 +807,9 @@ export class AnalyticsAggregationService {
           await queueJob.remove();
         }
       } catch (error) {
-        this.logger.warn(`Failed to remove queue job ${job.queueJobId}: ${error}`);
+        this.logger.warn(
+          `Failed to remove queue job ${job.queueJobId}: ${error}`,
+        );
       }
     }
 
@@ -769,7 +846,8 @@ export class AnalyticsAggregationService {
     } catch (error) {
       await this.aggregationJobRepository.update(job.id, {
         status: AggregationJobStatus.FAILED,
-        errorMessage: error instanceof Error ? error.message : 'Failed to queue job',
+        errorMessage:
+          error instanceof Error ? error.message : 'Failed to queue job',
       });
       throw error;
     }

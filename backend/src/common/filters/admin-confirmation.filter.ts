@@ -43,16 +43,17 @@ export class AdminConfirmationFilter implements ExceptionFilter {
       // Request a confirmation token
       if (this.confirmationService && user?.id) {
         try {
-          const confirmation = await this.confirmationService.requestConfirmation(
-            user.id,
-            actionType,
-            {
-              path: request.path,
-              method: request.method,
-              body: request.body,
-              query: request.query,
-            },
-          );
+          const confirmation =
+            await this.confirmationService.requestConfirmation(
+              user.id,
+              actionType,
+              {
+                path: request.path,
+                method: request.method,
+                body: request.body,
+                query: request.query,
+              },
+            );
 
           confirmationData.confirmationToken = confirmation.confirmationToken;
           confirmationData.expiresAt = confirmation.expiresAt;

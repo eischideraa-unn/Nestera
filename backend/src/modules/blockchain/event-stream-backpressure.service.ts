@@ -55,8 +55,7 @@ export class EventStreamBackpressureService {
     const queueStatus = await this.jobQueueService.getQueueStatus(
       QUEUE_NAMES.BLOCKCHAIN,
     );
-    const queueDepth =
-      (queueStatus?.waiting ?? 0) + (queueStatus?.active ?? 0);
+    const queueDepth = (queueStatus?.waiting ?? 0) + (queueStatus?.active ?? 0);
 
     return {
       paused: this.paused,

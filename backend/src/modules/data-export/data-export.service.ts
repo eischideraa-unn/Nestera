@@ -121,7 +121,10 @@ export class DataExportService {
     };
   }
 
-  async getExportFile(token: string): Promise<{ filePath: string; userId: string }> {
+  async getExportFile(
+    token: string,
+    userId: string,
+  ): Promise<{ filePath: string; userId: string }> {
     const request = await this.exportRepository.findOne({ where: { token } });
 
     if (!request || request.status !== ExportStatus.READY) {
@@ -241,7 +244,9 @@ export class DataExportService {
   }
 
   async processExportJob(requestId: string): Promise<void> {
-    const request = await this.exportRepository.findOne({ where: { id: requestId } });
+    const request = await this.exportRepository.findOne({
+      where: { id: requestId },
+    });
     if (!request) {
       throw new NotFoundException('Export request not found');
     }
@@ -259,7 +264,9 @@ export class DataExportService {
       return;
     }
 
-    const user = await this.userRepository.findOne({ where: { id: request.userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: request.userId },
+    });
     if (!user) {
       await this.exportRepository.update(request.id, {
         status: ExportStatus.FAILED,
@@ -293,7 +300,9 @@ export class DataExportService {
         'notifications.json': notifications,
       });
 
-      const latest = await this.exportRepository.findOne({ where: { id: request.id } });
+      const latest = await this.exportRepository.findOne({
+        where: { id: request.id },
+      });
       if (latest?.status === ExportStatus.CANCELLED) {
         await this.deleteExportFile(zipPath);
         return;
@@ -319,7 +328,9 @@ export class DataExportService {
 
       this.logger.log(`Export ${request.id} completed for user ${user.id}`);
     } catch (err) {
-      const latest = await this.exportRepository.findOne({ where: { id: request.id } });
+      const latest = await this.exportRepository.findOne({
+        where: { id: request.id },
+      });
       if (latest?.status === ExportStatus.CANCELLED) {
         return;
       }
@@ -472,7 +483,9 @@ export class DataExportService {
       Date.now() - request.createdAt.getTime() > DATA_EXPORT_PENDING_TTL_MS
     ) {
       await this.markExpiredAndCleanup(request.id, 'Export request timed out');
-      const updated = await this.exportRepository.findOne({ where: { id: request.id } });
+      const updated = await this.exportRepository.findOne({
+        where: { id: request.id },
+      });
       return updated ?? request;
     }
 
@@ -482,7 +495,9 @@ export class DataExportService {
       request.expiresAt.getTime() < Date.now()
     ) {
       await this.markExpiredAndCleanup(request.id, 'Export link expired');
-      const updated = await this.exportRepository.findOne({ where: { id: request.id } });
+      const updated = await this.exportRepository.findOne({
+        where: { id: request.id },
+      });
       return updated ?? request;
     }
 
@@ -493,7 +508,9 @@ export class DataExportService {
     requestId: string,
     reason = 'Export expired',
   ): Promise<void> {
-    const request = await this.exportRepository.findOne({ where: { id: requestId } });
+    const request = await this.exportRepository.findOne({
+      where: { id: requestId },
+    });
     if (!request) {
       return;
     }

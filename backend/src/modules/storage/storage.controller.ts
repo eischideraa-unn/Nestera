@@ -46,7 +46,9 @@ export class StorageController {
     @Body() dto: SignedUploadRequestDto,
   ) {
     if (!dto.originalName || !dto.contentType) {
-      throw new BadRequestException('originalName and contentType are required');
+      throw new BadRequestException(
+        'originalName and contentType are required',
+      );
     }
     return this.storageAccess.getSignedUploadUrl(
       dto.originalName,
@@ -70,11 +72,16 @@ export class StorageController {
       user.id,
       isAdmin,
     );
-    return { downloadUrl: url, expiresIn: this.configService.get('upload.signedUrlTtlSeconds', 3600) };
+    return {
+      downloadUrl: url,
+      expiresIn: this.configService.get('upload.signedUrlTtlSeconds', 3600),
+    };
   }
 
   @Get('signed')
-  @ApiOperation({ summary: 'Serve file via local signed URL (local provider only)' })
+  @ApiOperation({
+    summary: 'Serve file via local signed URL (local provider only)',
+  })
   async serveSignedFile(
     @Query('key') key: string,
     @Query('op') operation: string,
@@ -84,7 +91,8 @@ export class StorageController {
     @Query('owner') ownerId: string | undefined,
     @Res() res: Response,
   ) {
-    const provider = this.configService.get<string>('upload.provider') || 'local';
+    const provider =
+      this.configService.get<string>('upload.provider') || 'local';
     if (provider !== 'local') {
       throw new BadRequestException(
         'Direct signed URL serving is only available with local storage provider',

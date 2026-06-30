@@ -7,13 +7,29 @@ import { StorageAccessService } from './storage-access.service';
 export class StorageService {
   constructor(private readonly storageAccess: StorageAccessService) {}
 
+  toStorageKey(storagePath: string): string {
+    return storagePath.startsWith('/uploads/')
+      ? storagePath.slice('/uploads/'.length)
+      : storagePath;
+  }
+
+  readFileBuffer(storagePath: string): Buffer {
+    return this.storageAccess.readLocalFile(this.toStorageKey(storagePath));
+  }
+
   async saveFile(
     file: { originalname: string; buffer: Buffer; mimetype: string },
-    ownerId?: string,
+    ownerIdOrPrefix?: string,
   ): Promise<string> {
     try {
+      const keyPrefix =
+        ownerIdOrPrefix?.includes('/') === true ? ownerIdOrPrefix : 'files';
+      const ownerId =
+        ownerIdOrPrefix && !ownerIdOrPrefix.includes('/')
+          ? ownerIdOrPrefix
+          : undefined;
       const fileExtension = extname(file.originalname);
-      const key = `files/${randomUUID()}${fileExtension}`;
+      const key = `${keyPrefix}/${randomUUID()}${fileExtension}`;
 
       const stored = await this.storageAccess.getProvider().save(file.buffer, {
         key,
@@ -29,6 +45,30 @@ export class StorageService {
           visibility: 'private',
         });
       }
+
+      return stored.path;
+    } catch {
+      throw new InternalServerErrorException('Failed to save file');
+    }
+  }
+
+  async saveBuffer(
+    buffer: Buffer,
+    pathTemplate: string,
+    contentType = 'image/webp',
+  ): Promise<string> {
+    try {
+      const ext = extname(pathTemplate);
+      const keyPrefix = pathTemplate.includes('/')
+        ? pathTemplate.split('/').slice(0, -1).join('/')
+        : 'files';
+      const key = `${keyPrefix}/${randomUUID()}${ext}`;
+
+      const stored = await this.storageAccess.getProvider().save(buffer, {
+        key,
+        contentType,
+        visibility: 'private',
+      });
 
       return stored.path;
     } catch {
@@ -56,7 +96,7 @@ export class StorageService {
     );
   }
 
-  async deleteFile(key: string): Promise<void> {
-    await this.storageAccess.getProvider().delete(key);
+  async deleteFile(keyOrPath: string): Promise<void> {
+    await this.storageAccess.getProvider().delete(this.toStorageKey(keyOrPath));
   }
 }

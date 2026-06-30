@@ -1,3 +1,7 @@
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => '550e8400-e29b-41d4-a716-446655440001'),
+}));
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

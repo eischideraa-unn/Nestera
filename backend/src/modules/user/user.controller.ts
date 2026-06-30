@@ -11,8 +11,9 @@ import {
   UploadedFile,
   ParseFilePipe,
   MaxFileSizeValidator,
-  FileTypeValidator,
   ClassSerializerInterceptor,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -26,29 +27,16 @@ import {
 } from '@nestjs/swagger';
 import { StorageService } from '../storage/storage.service';
 import { UserService } from './user.service';
+import { AvatarUploadService } from './avatar-upload.service';
 import { SavingsService } from '../blockchain/savings.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NetWorthDto } from './dto/net-worth.dto';
 import { UserProfileResponseDto } from './dto/user-profile-response.dto';
+import { AvatarUploadResponseDto } from './dto/avatar-upload-response.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 import { FileValidator } from '@nestjs/common';
-
-class ImageTypeValidator extends FileValidator {
-  constructor() {
-    super({});
-  }
-
-  isValid(file: any): boolean {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    return allowedTypes.includes(file.mimetype);
-  }
-
-  buildErrorMessage(): string {
-    return 'Invalid file type. Only jpeg, png, and webp are allowed.';
-  }
-}
 
 class KycDocumentValidator extends FileValidator {
   constructor() {
@@ -72,6 +60,7 @@ class KycDocumentValidator extends FileValidator {
 export class UserController {
   constructor(
     private readonly userService: UserService,
+    private readonly avatarUploadService: AvatarUploadService,
     private readonly storageService: StorageService,
     private readonly savingsService: SavingsService,
   ) {}
@@ -205,9 +194,11 @@ export class UserController {
   }
 
   @Post('avatar')
+  @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Upload a profile avatar image',
-    description: 'Accepts JPEG, PNG, or WebP up to 5 MB.',
+    description:
+      'Accepts JPEG, PNG, or WebP up to 5 MB. Validates content and enqueues background processing (resize, EXIF strip). Returns job status for polling.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -215,24 +206,67 @@ export class UserController {
       properties: { file: { type: 'string', format: 'binary' } },
     },
   })
-  @ApiResponse({ status: 201, description: 'Avatar uploaded, URL returned' })
-  @ApiResponse({ status: 400, description: 'Invalid file type or size' })
+  @ApiResponse({
+    status: 202,
+    description:
+      'Avatar accepted for processing; poll status endpoint for result',
+    type: AvatarUploadResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid file type, size, or content',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
   async uploadAvatar(
     @CurrentUser() user: { id: string },
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
-          new ImageTypeValidator(),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 })],
+        fileIsRequired: true,
       }),
     )
     file: any,
-  ) {
-    const avatarUrl = await this.storageService.saveFile(file);
-    return this.userService.updateAvatar(user.id, avatarUrl);
+  ): Promise<AvatarUploadResponseDto> {
+    return this.avatarUploadService.uploadAvatar(user.id, file);
+  }
+
+  @Get('avatar/status')
+  @ApiOperation({
+    summary: 'Get latest avatar upload processing status',
+    description:
+      'Poll this endpoint after uploading an avatar to check processing progress.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Latest avatar upload status',
+    type: AvatarUploadResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'No avatar upload found' })
+  async getAvatarStatus(
+    @CurrentUser() user: { id: string },
+  ): Promise<AvatarUploadResponseDto | null> {
+    return this.avatarUploadService.getLatestUploadStatus(user.id);
+  }
+
+  @Get('avatar/status/:uploadId')
+  @ApiOperation({ summary: 'Get avatar upload processing status by ID' })
+  @ApiParam({ name: 'uploadId', description: 'Avatar upload UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Avatar upload status',
+    type: AvatarUploadResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Avatar upload not found' })
+  async getAvatarStatusById(
+    @CurrentUser() user: { id: string },
+    @Param('uploadId') uploadId: string,
+  ): Promise<AvatarUploadResponseDto> {
+    return this.avatarUploadService.getUploadStatus(user.id, uploadId);
   }
 
   @Post('me/kyc-docs')

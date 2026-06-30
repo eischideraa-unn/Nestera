@@ -6,6 +6,7 @@ import { ReferralsService } from './referrals.service';
 import { ReferralFraudDetectionService } from './referral-fraud-detection.service';
 import { Referral, ReferralStatus } from './entities/referral.entity';
 import { ReferralCampaign } from './entities/referral-campaign.entity';
+import { ProcessedReferralEvent } from './entities/processed-referral-event.entity';
 import { User } from '../user/entities/user.entity';
 import {
   NotFoundException,
@@ -69,6 +70,14 @@ describe('ReferralsService', () => {
           provide: getRepositoryToken(ReferralCampaign),
           useValue: {
             findOne: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(ProcessedReferralEvent),
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
           },
         },
         {
