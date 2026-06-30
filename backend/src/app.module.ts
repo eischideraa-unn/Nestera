@@ -106,6 +106,10 @@ const envValidationSchema = Joi.object({
   JWT_SECRET: Joi.string().min(10).required(),
   JWT_EXPIRATION: Joi.string().required(),
 
+  MULTI_TENANT_ENABLED: Joi.boolean().default(false),
+  DEFAULT_TENANT_ID: Joi.string().optional(),
+  DEFAULT_TENANT_SLUG: Joi.string().optional(),
+
   STELLAR_NETWORK: Joi.string().valid('testnet', 'mainnet').default('testnet'),
   SOROBAN_RPC_URL: Joi.string().uri().required(),
   HORIZON_URL: Joi.string().uri().required(),
@@ -425,7 +429,7 @@ const envValidationSchema = Joi.object({
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(CorrelationIdMiddleware, CompressionMetricsMiddleware)
+      .apply(CorrelationIdMiddleware, CompressionMetricsMiddleware, TenantContextMiddleware)
       .forRoutes('*');
   }
 }

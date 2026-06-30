@@ -10,14 +10,17 @@ import { CompressionMetricsService } from './services/compression-metrics.servic
 import { CompressionMetricsMiddleware } from './middleware/compression.middleware';
 import { AuditLogService } from './services/audit-log.service';
 import { ContractCompatibilityService } from './services/contract-compatibility.service';
+import { TenantContextService } from './services/tenant-context.service';
+import { TenantContextMiddleware } from './middleware/tenant-context.middleware';
 import { CacheModule } from '../modules/cache/cache.module';
 import { AuditLog } from './entities/audit-log.entity';
+import { Tenant } from './entities/tenant.entity';
 import { DataScopeService } from './services/data-scope.service';
 import { DistributedLockModule } from './distributed-lock/distributed-lock.module';
 
 @Global()
 @Module({
-  imports: [CacheModule, TypeOrmModule.forFeature([AuditLog])],
+  imports: [CacheModule, TypeOrmModule.forFeature([AuditLog, Tenant])],
   providers: [
     RateLimitMonitorService,
     PiiEncryptionService,
@@ -29,6 +32,8 @@ import { DistributedLockModule } from './distributed-lock/distributed-lock.modul
     CompressionMetricsMiddleware,
     AuditLogService,
     ContractCompatibilityService,
+    TenantContextService,
+    TenantContextMiddleware,
     DataScopeService,
   ],
   exports: [
@@ -40,6 +45,7 @@ import { DistributedLockModule } from './distributed-lock/distributed-lock.modul
     CompressionMetricsService,
     AuditLogService,
     ContractCompatibilityService,
+    TenantContextService,
     DataScopeService,
     DistributedLockModule,
   ],
